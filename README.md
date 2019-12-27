@@ -21,7 +21,7 @@ MP4              |H.264(baseline)  |AAC-LC, G711
 ----
 ## How to run
 1. git clone --recursive https://github.com/OpenNuvoton/NuMediaSDK.git
-2. Browsing into SampleCode folder and double click uVersion project file (KEIL/xxx.uvproj)
+2. Browsing into SampleCode folder and double click uVision project file (KEIL/xxx.uvproj)
 3. Enter Keil compile mode  
 a. Build  
 b. Download  
