@@ -40,6 +40,11 @@
 
 enum { UNUSED, DOT, BEGIN, END, QUESTIONMARK, STAR, PLUS, CHAR, CHAR_CLASS, INV_CHAR_CLASS, DIGIT, NOT_DIGIT, ALPHA, NOT_ALPHA, WHITESPACE, NOT_WHITESPACE, /* BRANCH */ };
 
+//Wayne: Avoid compiling issue.
+#if defined (__ARMCC_VERSION)
+#pragma anon_unions
+#endif
+
 typedef struct regex_t
 {
   unsigned char  type;   /* CHAR, STAR, etc.                      */
