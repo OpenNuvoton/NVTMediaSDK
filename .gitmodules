@@ -1,0 +1,3 @@
+[submodule "BSP/N9H26_emWin_NonOS"]
+	path = BSP/N9H26_emWin_NonOS
+	url = https://github.com/OpenNuvoton/N9H26_emWin_NonOS.git

@@ -30,4 +30,4 @@ a. Run
 ----
 ## TODO list
 1. Recorder
-2. MP3 cocec
+2. MP3 codec
