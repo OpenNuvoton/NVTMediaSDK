@@ -8,7 +8,7 @@ NuMediaSDK is a media software development kit for Nuvoton's ARM9 MPUs. It helps
 - Package/ -- Libraries source
 - PrebuildLib/ -- Prebuild libraries
 - SampleCode/ -- Sample programs
-- TestCode/ -- Test programs for ThirParty and Package libraries
+- TestCode/ -- Test programs for ThirdParty and Package libraries
 - ThirdParty/ -- Third party libraries
 
 ----
@@ -20,11 +20,12 @@ MP4              |H.264(baseline)  |AAC-LC, G711
 
 ----
 ## How to run
-1. Browsing into SampleCode folder and double click uVersion project file (KEIL/xxx.uvproj)
-2. Enter Keil compile mode  
+1. git clone --recursive https://github.com/OpenNuvoton/NuMediaSDK.git
+2. Browsing into SampleCode folder and double click uVersion project file (KEIL/xxx.uvproj)
+3. Enter Keil compile mode  
 a. Build  
 b. Download  
-3. Enter debug mode  
+4. Enter debug mode  
 a. Run
 
 ----
