@@ -38,7 +38,7 @@ int red_offset = 11;
 int green_offset = 5;
 int blue_offset = 0;
 
-extern VOID* puUIBufAddr;
+extern VOID* pvUIBufAddr;
 
 void line(int x1, int y1, int x2, int y2, unsigned colidx);
 
@@ -185,7 +185,7 @@ void pixel (int x, int y, unsigned colidx)
 #endif
 
 //  loc.p8 = line_addr [y] + x * bytes_per_pixel;
-    line_addr = (unsigned char *)puUIBufAddr+ y*(LCD_XSIZE*bytes_per_pixel);
+    line_addr = (unsigned char *)pvUIBufAddr+ y*(LCD_XSIZE*bytes_per_pixel);
     loc.p8 = line_addr + x*bytes_per_pixel;
     __setpixel(loc, xormode, colormap [colidx]);
 }
@@ -299,7 +299,7 @@ void fillrect (int x1, int y1, int x2, int y2, unsigned colidx)
     for (; y1 <= y2; y1++)
     {
 //      loc.p8 = line_addr [y1] + x1 * bytes_per_pixel;
-        line_addr = (unsigned char *)puUIBufAddr+ y1*(LCD_XSIZE*bytes_per_pixel);
+        line_addr = (unsigned char *)pvUIBufAddr+ y1*(LCD_XSIZE*bytes_per_pixel);
         loc.p8 = line_addr + x1* bytes_per_pixel;
         for (tmp = x1; tmp <= x2; tmp++)
         {

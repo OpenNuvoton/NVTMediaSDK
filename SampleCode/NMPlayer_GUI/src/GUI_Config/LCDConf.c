@@ -40,7 +40,7 @@ File        : LCDConf.c
 Purpose     : Display controller configuration (single layer)
 ---------------------------END-OF-HEADER------------------------------
 */
-
+#include <wchar.h>
 #include "GUI.h"
 #include "GUIDRV_Lin.h"
 #include "LCDConf.h"
@@ -186,10 +186,11 @@ UINT8 u8FrameBuf_OSD[LCD_XSIZE*LCD_YSIZE*2] __attribute__((aligned(32)));
 #endif
 #endif
 
-UINT8 *pu8FrameBufPtr;
-UINT8 *pu8FrameBufPtr_nocache;
-
-VOID* puUIBufAddr = NULL;
+UINT8 *pu8UIBufPtr = NULL;
+UINT8 *pu8UIBufPtr_noncacheable = NULL;
+VOID *pvUIBufAddr = NULL;
+UINT8 *pu8FrameBufPtr_nocache = NULL;
+uint8_t * pu8VideoBufPtr = NULL;
 
 void LCD_X_Config(void)
 {
@@ -213,14 +214,13 @@ void LCD_X_Config(void)
         LCD_SetVSizeEx(0, XSIZE_PHYS, YSIZE_PHYS * NUM_VSCREENS);
     }
 #if DEF_MAPTO_OSD
-		pu8FrameBufPtr  = (UINT8 *)((UINT32)u8FrameBuf_OSD | 0x80000000);
-		puUIBufAddr = (void*)pu8FrameBufPtr;
+	pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_OSD | 0x80000000);
 #else
-		pu8FrameBufPtr  = (UINT8 *)((UINT32)u8FrameBuf_VIDEO | 0x80000000);		
-		puUIBufAddr = (void*)pu8FrameBufPtr;
+	pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_VIDEO | 0x80000000);
 #endif
+	pvUIBufAddr = (void*)pu8UIBufPtr_noncacheable;
 		
-		LCD_SetVRAMAddrEx(0, (void *)pu8FrameBufPtr);
+	LCD_SetVRAMAddrEx(0, (void *)pu8UIBufPtr_noncacheable);
     //
     // Set user palette data (only required if no fixed palette is used)
     //
@@ -236,24 +236,22 @@ void LCD_X_Config(void)
     GUI_TOUCH_Calibrate(GUI_COORD_Y, 0, YSIZE_PHYS, 0, YSIZE_PHYS);
 }
 
-extern void VPOST_InterruptServicerRoutine();
-
-static void InitVPOST(uint8_t* pu8FrameBuffer)
-{		
-	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
-	LCDFORMATEX lcdFormat;	
-
-	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
-	lcdFormat.nScreenWidth = LCD_XSIZE;
-	lcdFormat.nScreenHeight = LCD_YSIZE;
-	wmemset ( (wchar_t *)pu8FrameBuffer, 0x80008000, (LCD_XSIZE*LCD_YSIZE) );
-	vpostLCMInit(&lcdFormat, (UINT32*)pu8FrameBuffer);
-}	
+void VPOST_InterruptServicerRoutine();
 
 void VPOST_VIDEO_Init()
 {
-	pu8FrameBufPtr_nocache = (uint8_t*)&u8FrameBuf_VIDEO[0];
-	InitVPOST((uint8_t*)u8FrameBuf_VIDEO);
+	LCDFORMATEX lcdFormat;
+	int fillsize=0;
+	uint8_t* pu8FrameBuffer = (uint8_t*)&u8FrameBuf_VIDEO[0];
+	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
+	lcdFormat.nScreenWidth = LCD_XSIZE;
+	lcdFormat.nScreenHeight = LCD_YSIZE;
+
+	pu8VideoBufPtr = (uint8_t *)((UINT32)pu8FrameBuffer);
+
+	wmemset ( (wchar_t *)pu8VideoBufPtr, 0x80008000, (LCD_XSIZE*LCD_YSIZE*2/sizeof(wchar_t)) );
+	
+	vpostLCMInit(&lcdFormat, (UINT32*)pu8FrameBuffer);	
 }
 
 static uint16_t rgb888torgb565(uint32_t u32rgb888Pixel)
@@ -291,6 +289,19 @@ void VPOST_OSD_Init()
 	vpostSetOSD_Transparent(eDRVVPOST_OSD_TRANSPARENT_RGB565, rgb888torgb565(DEF_OSD_COLORKEY));
 }
 
+void Display_Init()
+{
+	VPOST_VIDEO_Init();
+	#if DEF_MAPTO_OSD
+		VPOST_OSD_Init();
+	#endif
+}
+
+void Display_Fini()
+{
+	vpostLCMDeinit();
+}
+
 /*********************************************************************
 *
 *       LCD_X_DisplayDriver
@@ -324,44 +335,20 @@ int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData)
         // controller is not initialized by any external routine this needs
         // to be adapted by the customer...
         //
-				VPOST_VIDEO_Init();
-				#if DEF_MAPTO_OSD
-					VPOST_OSD_Init();
-				#endif
-				return 0;
+    	return 0;
     }
     case LCD_X_SETVRAMADDR:
     {
-			return 0;
-			#if 0
-        //
-        // Required for setting the address of the video RAM for drivers
-        // with memory mapped video RAM which is passed in the 'pVRAM' element of p
-        //
         LCD_X_SETVRAMADDR_INFO * p = (LCD_X_SETVRAMADDR_INFO *)pData;
-				if (p)
-				{
-					LCDFORMATEX lcdFormat;
-				#if DEF_MAPTO_OSD
-					vpostSetOSD_BaseAddress ( (UINT32)u8FrameBufPtr );
-					vpostSetOSD_Enable ( );
-				#else
-					lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_RGB565;
-					vpostLCMInit(&lcdFormat, (UINT32*)p->pVRAM);					
-				#endif
-					return 0;
-				} else
-					return -1;
-			#endif
+        GUI_USE_PARA(p);
+		return 0;
     }
     case LCD_X_SETORG:
     {
         //
         // Required for setting the display origin which is passed in the 'xPos' and 'yPos' element of p
         //
-        LCD_X_SETORG_INFO * p;
-        p = (LCD_X_SETORG_INFO *)pData;
-        pData=(void*)u8FrameBufPtr;
+        LCD_X_SETORG_INFO * p = (LCD_X_SETORG_INFO *)pData;
         GUI_USE_PARA(p);
         //...
         return 0;

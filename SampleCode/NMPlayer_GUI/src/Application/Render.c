@@ -1,7 +1,7 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
 * 
- * Redistribution and use in source and binary forms, with or without modification,
+* Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
 *      this list of conditions and the following disclaimer.
@@ -12,7 +12,7 @@
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
 * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
@@ -35,28 +35,12 @@
 #include "N9H26_VPOST.h"
 
 static uint8_t *s_pu8CurFBAddr;
-extern UINT8 *pu8FrameBufPtr_nocache;
+extern UINT8 *pu8VideoBufPtr;
 
 void VPOST_InterruptServicerRoutine()
 {
 	vpostSetFrameBuffer((uint32_t)s_pu8CurFBAddr);
 }
-
-static void InitVPOST(uint8_t* pu8FrameBuffer)
-{		
-	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
-	LCDFORMATEX lcdFormat;	
-
-//	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
-//	lcdFormat.nScreenWidth = LCD_PANEL_WIDTH;
-//	lcdFormat.nScreenHeight = LCD_PANEL_HEIGHT;	  
-//	vpostLCMInit(&lcdFormat, (UINT32*)pu8FrameBuffer);
-	
-	s_pu8CurFBAddr = pu8FrameBufPtr_nocache ;
-	vpostInstallCallBack(eDRVVPOST_VINT, (PFN_DRVVPOST_INT_CALLBACK)VPOST_InterruptServicerRoutine,  (PFN_DRVVPOST_INT_CALLBACK*)&fun_ptr);
-	vpostEnableInt(eDRVVPOST_VINT);	
-	sysEnableInterrupt(IRQ_VPOST);	
-}	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t s_u32PCMPlaybackBufSize;
@@ -106,10 +90,15 @@ Render_Init(
 )
 {
 	uint32_t u32SPUFragSize;
-	
+	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
+
+	s_pu8CurFBAddr = pu8VideoBufPtr ;
+
 	//Init VPOST
-	InitVPOST(s_pu8CurFBAddr);
-	
+	vpostInstallCallBack(eDRVVPOST_VINT, (PFN_DRVVPOST_INT_CALLBACK)VPOST_InterruptServicerRoutine,  (PFN_DRVVPOST_INT_CALLBACK*)&fun_ptr);
+	vpostEnableInt(eDRVVPOST_VINT);	
+	sysEnableInterrupt(IRQ_VPOST);
+		
 	//Enable SPU
 	if(PCMPlayback_Start(u32AudioSampleRate, u32AudioChannel, 80, &u32SPUFragSize) != 0){
 		printf("Unable start PCM playback \n");
@@ -133,10 +122,12 @@ Render_Init(
 
 void
 Render_Final(void)
-{
-	s_pu8CurFBAddr = pu8FrameBufPtr_nocache;
+{	
 	sysDisableInterrupt(IRQ_VPOST);
+
 	vpostDisableInt(eDRVVPOST_VINT);	
+
+	vpostSetFrameBuffer((uint32_t)pu8VideoBufPtr);
 	
 	if(s_pu8PCMPlaybackBuf){
 		PCMPlayback_Stop();
@@ -144,7 +135,6 @@ Render_Final(void)
 		s_pu8PCMPlaybackBuf = NULL;
 		s_u32PCMPlaybackBufSize = 0;
 	}
-	//Wayne vpostLCMDeinit();
 }
 
 

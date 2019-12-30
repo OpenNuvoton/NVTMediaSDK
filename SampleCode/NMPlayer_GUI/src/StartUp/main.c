@@ -1,7 +1,7 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
 * 
- * Redistribution and use in source and binary forms, with or without modification,
+* Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
 *      this list of conditions and the following disclaimer.
@@ -12,7 +12,7 @@
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
 * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
@@ -43,7 +43,6 @@
 #include "LCDConf.h"
 
 extern void * worker_touching ( void *pvArgs );
-extern UINT8 u8FrameBuf_VIDEO[LCD_XSIZE*LCD_YSIZE*2] __attribute__((aligned(32)));
 
 //#define STORAGE_SD
 
@@ -213,16 +212,18 @@ static void device_init(void)
     sysInitializeUART(&uart);
 
     sysEnableCache(CACHE_WRITE_BACK);
-	
-	
+
+    printf("Display_Init start.\n");
+    Display_Init();
+
 // Filesystem initilization	
-	  printf("fsInitFileSystem.\n");
-		fsInitFileSystem();	
+	printf("fsInitFileSystem.\n");
+	fsInitFileSystem();
 	
 #ifdef STORAGE_SD
     InitStorage_SD();
 #else
-		InitStorage_NAND();
+	InitStorage_NAND();
 #endif
 }
 
@@ -255,7 +256,7 @@ int main(void)
 #else
 	pthread_create( &pxID_worker, &attr, worker_guiman, NULL );
 #endif
-	
+
 	vTaskStartScheduler();
 	for(;;);
 	
@@ -273,12 +274,14 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
+	printf("MMMMMMMMMMM vApplicationStackOverflowHook %s MMMMMMMMMMMMM\n", pcTaskName);
+
 	taskDISABLE_INTERRUPTS();
 	for( ;; );
 }
 
 void vApplicationMallocFailedHook( void ){
-		printf("MMMMMMMMMMM FreeRTOS malloc failed MMMMMMMMMMMMM\n");
+	printf("MMMMMMMMMMM vApplicationMallocFailedHook MMMMMMMMMMMMM\n");
 }
 
 // We need this when configSUPPORT_STATIC_ALLOCATION is enabled

@@ -52,7 +52,15 @@ Purpose     : Display controller initialization
 //
 // Define the available number of bytes available for the GUI
 //
-#define GUI_NUMBYTES  0x1000   //0x20000
+#define GUI_NUMBYTES  (1 * 1024 * 1024)
+//
+// Define the average block size
+//
+#define GUI_BLOCKSIZE 0x80
+//
+// 32 bit aligned memory area
+//
+static U32 aMemory[GUI_NUMBYTES / 4] __attribute__((aligned(4)));
 
 /*********************************************************************
 *
@@ -68,11 +76,9 @@ Purpose     : Display controller initialization
 *   Called during the initialization process in order to set up the
 *   available memory for the GUI.
 */
+
+
 void GUI_X_Config(void) {
-  //
-  // 32 bit aligned memory area
-  //
-  static U32 aMemory[GUI_NUMBYTES / 4];
   //
   // Assign memory to emWin
   //
@@ -80,7 +86,8 @@ void GUI_X_Config(void) {
   //
   // Set default font
   //
-  GUI_SetDefaultFont(GUI_FONT_6X8);
+   GUI_SetDefaultFont(GUI_FONT_6X8);
+  GUI_ALLOC_SetAvBlockSize(GUI_BLOCKSIZE);
 }
 
 /*************************** End of file ****************************/

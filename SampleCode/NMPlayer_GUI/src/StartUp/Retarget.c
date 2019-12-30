@@ -19,19 +19,39 @@
  * See the "rt_sys.h" header file for complete function descriptions.
  */
 
+#if defined (__GNUC__)
+#undef _MODE_T_DECLARED
+#endif
+
+#if defined (__GNUC__)
+#undef _TIME_T_DECLARED
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined (__ARMCC_VERSION)
 #include <rt_sys.h>
+#endif
+
+#if defined (__GNUC__)
+#include <sys/stat.h>
+#include <errno.h>
+#endif
 
 #include "wblib.h"
 #include "N9H26_NVTFAT.h"
 
+#if defined (__ARMCC_VERSION)
 #pragma import(__use_no_semihosting_swi)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if defined (__ARMCC_VERSION)
 
 #define DEFAULT_HANDLE 0x100
 
@@ -76,16 +96,14 @@ FILEHANDLE _sys_open(const char * name, int openmode)
 	else if (openmode == OPEN_R){
 		i32OpenFlag = O_RDONLY;
 	}
+	else if (openmode == OPEN_A){
+		i32OpenFlag = O_APPEND;
+	}
 	
 	if((i32OpenFlag == O_RDWR) || (i32OpenFlag == O_WRONLY)){
-		if(openmode & OPEN_A){
-			i32OpenFlag |= O_APPEND;
-		}		
-		else{
-			if(i32OpenFlag == O_WRONLY){
+			if(openmode & OPEN_W){
 				i32OpenFlag |= (O_CREATE | O_TRUNC);
 			}
-		}
 	}
 	
 	fsAsciiToUnicode((VOID *)name, szUnicodeFileName, TRUE); 
@@ -190,8 +208,7 @@ int _sys_istty(FILEHANDLE fh)
 int _sys_seek(FILEHANDLE fh, long pos)
 {
 	if(fh != DEFAULT_HANDLE){
-		fsFileSeek(fh, pos, SEEK_SET);
-		return pos;
+		return fsFileSeek(fh, pos, SEEK_SET);
 	}
 
 	return -1; // error
@@ -232,6 +249,84 @@ int _sys_tmpnam(char * name, int sig, unsigned maxlen)
 {
     return 0; // fail, not supported
 }
+#endif
+
+#if defined(__GNUC__)
+
+#if 0
+int _open (const char * path, int flags, ...)
+{
+  return (-1);
+}
+
+int _close (int fd)
+{
+  return (-1);
+}
+
+int _lseek (int fd, int ptr, int dir)
+{
+  return (0);
+}
+#endif
+
+int __attribute__((weak)) _fstat (int fd, struct stat * st)
+{
+  memset (st, 0, sizeof (* st));
+  st->st_mode = S_IFCHR;
+  return (0);
+}
+
+#if 0
+int _isatty (int fd)
+{
+  return (1);
+}
+#endif
+
+int _read (int fd, char * ptr, int len)
+{
+
+  return 0;
+}
+
+int _write (int fd, char * ptr, int len)
+{
+	unsigned char *szStr = (unsigned char *)ptr;
+	char chLastByte = szStr[len];
+
+	szStr[len] = 0;
+	sysprintf("%s", szStr);
+	szStr[len] = chLastByte;
+	return len;
+}
+
+#if 0
+caddr_t _sbrk (int incr)
+{
+  static char * heap;
+         char * prev_heap;
+
+  if (heap == NULL)
+  {
+    heap = (char *)&__HeapBase;
+  }
+
+  prev_heap = heap;
+
+  if ((heap + incr) > (char *)&__HeapLimit)
+  {
+    errno = ENOMEM;
+    return (caddr_t) -1;
+  }
+
+  heap += incr;
+
+  return (caddr_t) prev_heap;
+}
+#endif
+
+#endif
 
 
 #ifdef __cplusplus
