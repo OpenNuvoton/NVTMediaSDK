@@ -349,7 +349,7 @@
               <MiscControls>--c99</MiscControls>
               <Define>__N9H26__,__UNISTD_FILE__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include\portable;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\Package\NuMedia\inc</IncludePath>
+              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include\portable;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\Package\NVTMedia\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -446,9 +446,9 @@
           <GroupName>SAL</GroupName>
           <Files>
             <File>
-              <FileName>NuMedia_SAL_FS.c</FileName>
+              <FileName>NVTMedia_SAL_FS.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\Package\NuMedia\src\SAL\NuMedia_SAL_FS.c</FilePath>
+              <FilePath>..\..\..\Package\NVTMedia\src\SAL\NVTMedia_SAL_FS.c</FilePath>
             </File>
           </Files>
         </Group>

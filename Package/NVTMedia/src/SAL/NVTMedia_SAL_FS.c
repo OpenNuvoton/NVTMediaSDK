@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "NuMedia_SAL_FS.h"
+#include "NVTMedia_SAL_FS.h"
 
 #if NUMEDIA_CFG_SAL_FS_PORT == NUMEDIA_SAL_FS_PORT_NVTFAT
 

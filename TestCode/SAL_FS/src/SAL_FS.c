@@ -16,8 +16,8 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS_POSIX.h"
 
-#include "NuMedia_SAL_OS.h"
-#include "NuMedia_SAL_FS.h"
+#include "NVTMedia_SAL_OS.h"
+#include "NVTMedia_SAL_FS.h"
 
 #define ENABLE_SD_ONE_PART
 #define ENABLE_SD_0
@@ -127,7 +127,7 @@ void vFileSystemTest( void *pvParameters )
 #if defined (__UNISTD_FILE__)	
 	pTestFile = open(szCreateFile, O_RDWR | O_CREATE);
 	
-	if(pTestFile == NULL){
+	if(pTestFile <= 0){
 		printf("Unable create new file \n");
 		goto vFileSystemTest_done;
 	}
