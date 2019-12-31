@@ -19,6 +19,7 @@
 */
 
 // USER START (Optionally insert additional includes)
+#include <stdio.h>
 #include "player.h"
 #include "FileList.h"
 #include "LCDConf.h"
@@ -567,12 +568,21 @@ static const U8 _acImage_3[6966] = {
 
 // USER START (Optionally insert additional static data)
 // USER END
-
 /*********************************************************************
 *
 *       _aDialogCreate
 */
 static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
+#ifdef __800x480__
+  { WINDOW_CreateIndirect, "Playback", ID_WINDOW_0, 0, 0, 800, 480, 0, 0x0, 0 },
+  { SLIDER_CreateIndirect, "TimeSlice", ID_SLIDER_0, 22, 398, 759, 63, 0, 0x0, 0 },
+  { IMAGE_CreateIndirect, "Next", ID_IMAGE_0, 739, 210, 32, 32, 0, IMAGE_CF_AUTOSIZE, 0 },
+  { IMAGE_CreateIndirect, "Previous", ID_IMAGE_1, 25, 210, 32, 32, 0, IMAGE_CF_AUTOSIZE, 0 },
+  { IMAGE_CreateIndirect, "Play", ID_IMAGE_2, 371, 200, 48, 48, 0, IMAGE_CF_AUTOSIZE, 0 },
+  { IMAGE_CreateIndirect, "Stop", ID_IMAGE_3, 371, 200, 48, 48, 0, IMAGE_CF_AUTOSIZE, 0 },
+  { TEXT_CreateIndirect, "Current", ID_TEXT_0, 21, 376, 57, 20, 0, 0x64, 0 },
+  { TEXT_CreateIndirect, "Total", ID_TEXT_1, 731, 376, 53, 20, 0, 0x64, 0 },
+#else
   { WINDOW_CreateIndirect, "Playback", ID_WINDOW_0, 0, 0, 320, 240, 0, 0x0, 0 },
   { SLIDER_CreateIndirect, "TimeSlice", ID_SLIDER_0, 19, 203, 283, 34, 0, 0x0, 0 },
   { IMAGE_CreateIndirect, "Next", ID_IMAGE_0, 269, 88, 32, 32, 0, IMAGE_CF_AUTOSIZE, 0 },
@@ -581,10 +591,10 @@ static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
   { IMAGE_CreateIndirect, "Stop", ID_IMAGE_3, 142, 80, 48, 48, 0, IMAGE_CF_AUTOSIZE, 0 },
   { TEXT_CreateIndirect, "Current", ID_TEXT_0, 17, 185, 57, 20, 0, 0x64, 0 },
   { TEXT_CreateIndirect, "Total", ID_TEXT_1, 254, 186, 53, 20, 0, 0x64, 0 },
+#endif
   // USER START (Optionally insert additional widgets)
   // USER END
 };
-
 /*********************************************************************
 *
 *       Static code

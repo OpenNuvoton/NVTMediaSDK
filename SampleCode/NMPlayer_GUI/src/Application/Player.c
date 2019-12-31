@@ -97,6 +97,13 @@ int player_start(void)
 	E_NM_ERRNO eNMRet = 0;
 	const char* szAVIFileName = filelist_getFileName(g_sPlayer.m_i32FileListIdx);
 	
+	if ( filelist_getInstance()->m_i32UsedNum < 1 )
+	{
+		eNMRet = 1;
+		printf("No any media files in storage, copy media files into storage\n");
+		goto exit_player_start;
+	}
+
 	if ( g_sPlayer.m_hPlay == eNM_INVALID_HANDLE )
 	{
 		memset( (void*)&g_sPlayer.m_sPlayIF, 0, sizeof(S_NM_PLAY_IF) );
