@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "NuMedia.h"
+#include "NVTMedia.h"
 
 #define DEF_PATH_MEDIA_FOLDER "C:\\DCIM\\"
 

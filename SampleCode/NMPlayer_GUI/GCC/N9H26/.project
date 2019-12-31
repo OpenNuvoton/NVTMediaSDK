@@ -75,9 +75,9 @@
 			<locationURI>PARENT-2-PROJECT_LOC/src/StartUp/multithread.c</locationURI>
 		</link>
 		<link>
-			<name>NMedia/NuMedia_SAL_FS.c</name>
+			<name>NMedia/NVTMedia_SAL_FS.c</name>
 			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/Package/NuMedia/src/SAL/NuMedia_SAL_FS.c</locationURI>
+			<locationURI>PARENT-4-PROJECT_LOC/Package/NVTMedia/src/SAL/NVTMedia_SAL_FS.c</locationURI>
 		</link>
 		<link>
 			<name>Application/TaskGUIDemo.c</name>

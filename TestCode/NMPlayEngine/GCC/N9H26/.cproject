@@ -135,7 +135,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/POSIX_FreeRTOS/include/private&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../Package/NuMedia/inc&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../Package/NVTMedia/inc&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../inc&quot;"/>
                                     								
@@ -171,7 +171,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_NVTFAT_FREERTOS"/>
                                     									
-                                    <listOptionValue builtIn="false" value="NuMedia"/>
+                                    <listOptionValue builtIn="false" value="NVTMedia"/>
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
@@ -199,7 +199,9 @@
                                 								
                                 <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.usenewlibnano.850354995" name="Use newlib-nano (--specs=nano.specs)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.usenewlibnano" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
-                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.other.1060784156" name="Other linker flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.other" useByScannerDiscovery="false" value="--specs=rdimon.specs -Wl,--start-group -lgcc -lc -lc -lm -lrdimon -Wl,--end-group" valueType="string"/>
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.other.1060784156" name="Other linker flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.other" useByScannerDiscovery="false" value="-Wl,--start-group -lgcc -lc -lc -lm -Wl,--end-group" valueType="string"/>
+                                								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.usenewlibnosys.1743358585" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.usenewlibnosys" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
                                 <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.input.104610302" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.input">
                                     									

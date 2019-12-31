@@ -125,7 +125,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/POSIX_FreeRTOS/include/private&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../Package/NuMedia/inc&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../Package/NVTMedia/inc&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/tiny-regex-c&quot;"/>
                                     									
@@ -165,7 +165,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="NUemWin_ARM9_GNU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="NuMedia"/>
+                                    <listOptionValue builtIn="false" value="NVTMedia"/>
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									

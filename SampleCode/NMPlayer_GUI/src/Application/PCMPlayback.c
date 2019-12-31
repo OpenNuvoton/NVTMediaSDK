@@ -35,7 +35,7 @@
 
 #include "N9H26_SPU.h"
 #include "PCMPlayback.h"
-#include "NuMedia.h"
+#include "NVTMedia.h"
 
 typedef struct{
 	uint8_t		*pu8Buf;

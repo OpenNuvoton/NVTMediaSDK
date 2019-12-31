@@ -30,7 +30,7 @@
 /* Nuvoton includes. */
 #include "wblib.h"
 #include "N9H26.h"
-#include "NuMedia.h"
+#include "NVTMedia.h"
 #include "Render.h"
 
 #include "FileList.h"

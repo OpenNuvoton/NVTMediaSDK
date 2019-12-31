@@ -22,8 +22,8 @@
 #include "wblib.h"
 #include "task.h"
 
-#include "NuMedia.h"
-#include "NuMedia_SAL_OS.h"
+#include "NVTMedia.h"
+#include "NVTMedia_SAL_OS.h"
 
 #include "MainTask.h"
 

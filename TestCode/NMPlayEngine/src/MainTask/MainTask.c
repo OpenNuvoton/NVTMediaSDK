@@ -24,9 +24,9 @@
 #include "N9H26_SIC.h"
 #include "N9H26_SDIO.h"
 
-#include "NuMedia.h"
-#include "NuMedia_SAL_OS.h"
-#include "NuMedia_SAL_FS.h"
+#include "NVTMedia.h"
+#include "NVTMedia_SAL_OS.h"
+#include "NVTMedia_SAL_FS.h"
 
 #include "Render.h"
 

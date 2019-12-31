@@ -18,7 +18,7 @@
 #ifndef __RENDER_H__
 #define __RENDER_H__
 
-#include "NuMedia.h"
+#include "NVTMedia.h"
 #include "LCDConf.h"
 
 #define LCD_PANEL_WIDTH		LCD_XSIZE
