@@ -77,7 +77,29 @@ static void cbBackgroundWin(WM_MESSAGE* pMsg)
 
 void * worker_guiman ( void *pvArgs )
 {
-		GUI_Init();
+#ifdef DEF_WITHOUT_GUI
+
+	// Create file list.
+	filelist_create(DEF_PATH_MEDIA_FOLDER );
+
+	// Dump media file name in file list.
+	filelist_dump ( );
+
+	player_start();
+	player_play();
+
+	while (1)
+	{
+		E_NM_PLAY_STATUS ePlayerStatusNow =  player_status();
+		if ( ePlayerStatusNow == eNM_PLAY_STATUS_EOM )
+		{
+			printf("##########################\n");
+			player_next();
+		}
+		usleep(100000);
+	}
+#else
+	GUI_Init();
 
 		// Hijacking callback of Desktop.
 		WM_SetCallback(WM_HBKWIN, cbBackgroundWin);
@@ -116,6 +138,7 @@ void * worker_guiman ( void *pvArgs )
 			i32IdleCnt++;
 			GUI_Delay(100);
 		}
+#endif
 
 exit_worker_guiman:
 		return NULL;

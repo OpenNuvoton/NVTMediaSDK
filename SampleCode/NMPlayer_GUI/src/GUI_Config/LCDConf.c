@@ -292,9 +292,12 @@ void VPOST_OSD_Init()
 void Display_Init()
 {
 	VPOST_VIDEO_Init();
+
+#ifndef DEF_WITHOUT_GUI
 	#if DEF_MAPTO_OSD
 		VPOST_OSD_Init();
 	#endif
+#endif
 }
 
 void Display_Fini()

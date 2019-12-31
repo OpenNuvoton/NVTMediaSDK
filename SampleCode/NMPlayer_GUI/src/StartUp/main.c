@@ -241,12 +241,23 @@ static void device_fini(void)
 
 void * worker_guiman ( void *pvArgs );
 
+void dump_clocks(void)
+{
+	printf("**** sysGetSystemClock = %d KHz\n", sysGetSystemClock()/1000);
+	printf("**** sysGetCPUClock = %d KHz\n", sysGetCPUClock()/1000);
+	printf("**** sysGetHCLK1Clock = %d KHz\n", sysGetHCLK1Clock()/1000);
+	printf("**** sysGetAPBClock = %d KHz\n", sysGetAPBClock()/1000);
+	printf("**** sysGetDramClock = %d KHz\n", sysGetDramClock()/1000);
+}
+
 int main(void)
 {
 	pthread_t pxID_worker;
 	pthread_attr_t attr;
 
 	device_init();
+
+	dump_clocks();
 
 	pthread_attr_init( &attr );
 	pthread_attr_setstacksize(&attr, 32*1024);
