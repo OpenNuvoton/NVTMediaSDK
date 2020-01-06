@@ -266,7 +266,8 @@ RunDeMuxCmd(
 			S_DEMUX_IOCTL_SEEK *psSeekArgv = (S_DEMUX_IOCTL_SEEK *)psDeMuxPriv->pvCmdArgv;
 			
 			psDeMuxPriv->eCmdRet = SeekPlay(psDeMuxRes, psSeekArgv->u32SeekTime, psSeekArgv->u32TotalVideoChunks, psSeekArgv->u32TotalAudioChunks);
-
+			free(psSeekArgv);
+			
 			if((psDeMuxPriv->eCmdRet == eNM_ERRNO_NONE) && (psDeMuxPriv->eDeMuxThreadState == eDEMUX_THREAD_STATE_PLAYING)){
 				psDeMuxPriv->eDeMuxThreadState = eDEMUX_THREAD_STATE_TO_PLAY;
 			}
@@ -759,7 +760,7 @@ FinialDeMuxPriv(
 	psDeMuxRes->pvDeMuxPriv = NULL;
 }
 
-E_NM_ERRNO
+static E_NM_ERRNO
 DeMuxThread_IOCTL(
 	S_PLAY_DEMUX_RES *psDeMuxRes,
 	E_DEMUX_IOCTL_CODE eCmdCode,
@@ -805,7 +806,7 @@ DeMuxThread_IOCTL(
 		break;
 		case eDEMUX_IOCTL_SET_SEEK:
 		{
-			if(i32CmdArgvSize < sizeof(S_DEMUX_IOCTL_SEEK)){
+			if(i32CmdArgvSize < sizeof(S_DEMUX_IOCTL_SEEK *)){
 				eNMRet = eNM_ERRNO_SIZE;
 			}
 		}
@@ -966,16 +967,20 @@ PlayDeMux_Seek(
 	bool bWait
 )
 {
-	S_DEMUX_IOCTL_SEEK sSeekArgv;
+	S_DEMUX_IOCTL_SEEK *psSeekArgv;
 	
-	sSeekArgv.u32SeekTime = u32SeekTime;
-	sSeekArgv.u32TotalVideoChunks = u32TotalVideoChunks;
-	sSeekArgv.u32TotalAudioChunks = u32TotalAudioChunks;
+	psSeekArgv = malloc(sizeof(S_DEMUX_IOCTL_SEEK));
+	if(psSeekArgv == NULL)
+		return eNM_ERRNO_MALLOC;
+	
+	psSeekArgv->u32SeekTime = u32SeekTime;
+	psSeekArgv->u32TotalVideoChunks = u32TotalVideoChunks;
+	psSeekArgv->u32TotalAudioChunks = u32TotalAudioChunks;
 	
 	if(psDeMuxRes->tDeMuxThread == NULL)
 		return eNM_ERRNO_OS;
 
-	return DeMuxThread_IOCTL(psDeMuxRes, eDEMUX_IOCTL_SET_SEEK, (void *)&sSeekArgv, sizeof(S_DEMUX_IOCTL_SEEK), bWait);
+	return DeMuxThread_IOCTL(psDeMuxRes, eDEMUX_IOCTL_SET_SEEK, (void *)psSeekArgv, sizeof(S_DEMUX_IOCTL_SEEK *), bWait);
 }
 
 E_NM_PLAY_STATUS

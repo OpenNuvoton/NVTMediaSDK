@@ -25,6 +25,21 @@
 #ifndef __RECORD_MUX_H__
 #define __RECORD_MUX_H__
 
+typedef enum{
+	eMUX_IOCTL_NONE,
+
+	//Output command
+	eMUX_IOCTL_GET_STATE,
+	
+	
+	//Input commadn
+	eMUX_IOCTL_SET_STATE = 0x8000,
+	eMUX_IOCTL_SET_RECORD,
+	eMUX_IOCTL_SET_PAUSE,	
+	eMUX_IOCTL_SET_NEXT_MEDIA,	
+}E_MUX_IOCTL_CODE;
+
+
 E_NM_ERRNO
 RecordMux_Init(
 	S_RECORD_MUX_RES *psMuxRes
@@ -45,5 +60,25 @@ RecordMux_ThreadDestroy(
 	S_RECORD_MUX_RES *psMuxRes
 );
 
+E_NM_ERRNO
+RecordMux_Record(
+	S_RECORD_MUX_RES *psMuxRes,
+	bool bWait
+);
+
+E_NM_ERRNO
+RecordMux_Pause(
+	S_RECORD_MUX_RES *psMuxRes,
+	bool bWait
+);
+
+E_NM_ERRNO
+RecordMux_RegNextMedia(
+	S_RECORD_MUX_RES *psMuxRes,
+	S_NM_MEDIAWRITE_IF *psMediaIF,
+	void *pvMediaRes,
+	void *pvStatusCBPriv,
+	bool bWait
+);
 
 #endif

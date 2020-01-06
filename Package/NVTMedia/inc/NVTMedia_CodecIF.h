@@ -89,6 +89,24 @@ typedef	E_NM_ERRNO
 
 
 /**
+ *	- get video codec attribute, used before record media open  
+ *
+ * 	@param[in]		psSrcCtx		video source context
+ * 	@param[out]		psDestCtx		video destination context
+ *
+ * 	@return	Error code
+ *
+ *
+ */
+
+typedef	E_NM_ERRNO
+(*PFN_NM_CODEC_VIDEO_CODEC_ATTR_GET)(
+	S_NM_VIDEO_CTX *psSrcCtx,
+	S_NM_VIDEO_CTX *psDestCtx
+);
+
+
+/**
  *	- audio encode 
  *
  * 	@param[in]		psAudioSrcCtx	audio source context
@@ -107,6 +125,24 @@ typedef	E_NM_ERRNO
 	uint32_t *pu32RemainDataSize,
 	void *pvCodecRes
 );
+
+/**
+ *	- get audio codec attribute, used before record media open  
+ *
+ * 	@param[in]		psSrcCtx		video source context
+ * 	@param[out]		psDestCtx		video destination context
+ *
+ * 	@return	Error code
+ *
+ *
+ */
+
+typedef	E_NM_ERRNO
+(*PFN_NM_CODEC_AUDIO_CODEC_ATTR_GET)(
+	S_NM_AUDIO_CTX *psSrcCtx,
+	S_NM_AUDIO_CTX *psDestCtx
+);
+
 
 /**
  *	- video decode 
@@ -176,6 +212,7 @@ typedef struct S_NM_CODECENC_VIDEO_IF {
 	PFN_NM_CODEC_CLOSE                  pfnCloseCodec;
 
 	PFN_NM_CODEC_VIDEO_ENCODE           pfnEncodeVideo;
+	PFN_NM_CODEC_VIDEO_CODEC_ATTR_GET		pfnCodecAttrGet;
 } S_NM_CODECENC_VIDEO_IF;
 
 
@@ -185,6 +222,7 @@ typedef struct S_NM_CODECENC_AUDIO_IF {
 	PFN_NM_CODEC_CLOSE                  pfnCloseCodec;
 
 	PFN_NM_CODEC_AUDIO_ENCODE           pfnEncodeAudio;
+	PFN_NM_CODEC_AUDIO_CODEC_ATTR_GET		pfnCodecAttrGet;
 } S_NM_CODECENC_AUDIO_IF;
 
 // ==================================================

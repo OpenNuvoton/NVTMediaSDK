@@ -25,6 +25,19 @@
 #ifndef __RECORD_ENCODE_H__
 #define __RECORD_ENCODE_H__
 
+typedef enum{
+	eENCODE_IOCTL_NONE,
+
+	//Input command
+	eENCODE_IOCTL_GET_STATE,
+	
+	
+	//Output commadn
+	eENCODE_IOCTL_SET_STATE = 0x8000,
+	
+}E_ENCODE_IOCTL_CODE;
+
+
 E_NM_ERRNO
 RecordEncode_Init(
 	S_RECORD_ENCODE_RES *psEncodeRes
@@ -45,5 +58,9 @@ RecordEncode_ThreadDestroy(
 	S_RECORD_ENCODE_RES *psEncodeRes
 );
 
+E_NM_ERRNO
+RecordEncode_Run(
+	S_RECORD_ENCODE_RES *psEncodeRes
+);
 
 #endif

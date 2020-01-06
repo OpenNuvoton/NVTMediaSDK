@@ -25,7 +25,6 @@
 #ifndef __RENDER_H__
 #define __RENDER_H__
 
-#include "NVTMedia.h"
 
 #define LCD_PANEL_WIDTH		320
 #define LCD_PANEL_HEIGHT	240
@@ -39,15 +38,6 @@ Render_Init(
 	uint32_t u32AudioChannel
 );
 
-void
-Render_VideoFlush(
-	S_NM_VIDEO_CTX	*psVideoCtx
-);
-
-void
-Render_AudioFlush(
-	S_NM_AUDIO_CTX	*psAudioCtx
-);
 
 void
 Render_Final(void);

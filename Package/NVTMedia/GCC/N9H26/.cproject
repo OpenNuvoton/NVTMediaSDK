@@ -155,6 +155,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="_TIMER_T_DECLARED"/>
                                     									
+                                    <listOptionValue builtIn="false" value="_TIME_T_DECLARED"/>
+                                    									
                                     <listOptionValue builtIn="false" value="_CLOCKID_T_DECLARED"/>
                                     								
                                 </option>

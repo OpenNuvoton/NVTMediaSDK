@@ -65,7 +65,7 @@ RecordEngine_Create(
 		return eNM_ERRNO_MALLOC;
 	
 	S_RECORD_VIDEO_ENCODE_RES *psVideoEncodeRes = &psRecordEngineRes->sEncodeRes.sVideoEncodeRes;
-	S_RECORD_AUDIO_ENCODE_RES *psAudioEncodeRes = &psRecordEngineRes->sEncodeRes.sAudioEnocdeRes;
+	S_RECORD_AUDIO_ENCODE_RES *psAudioEncodeRes = &psRecordEngineRes->sEncodeRes.sAudioEncodeRes;
 	
 	//Fill media interface
 	psRecordEngineRes->sMuxRes.psMediaIF = psRecordIF->psMediaIF;
@@ -144,6 +144,9 @@ RecordEngine_Create(
 		goto RecordEngine_Create_fail;
 	}
 	
+	RecordMux_Record(&psRecordEngineRes->sMuxRes, true);
+	RecordEncode_Run(&psRecordEngineRes->sEncodeRes);
+	
 	*phRecord = (HRECORD)psRecordEngineRes;
 	return eNM_ERRNO_NONE;
 
@@ -183,8 +186,10 @@ RecordEngine_Destroy(
 	if(psRecordEngineRes == NULL)
 		return eNM_ERRNO_NULL_RES;
 
-	
-	
+	RecordEncode_Stop(&psRecordEngineRes->sEncodeRes);
+
+	RecordMux_Pause(&psRecordEngineRes->sMuxRes, true);
+			
 	//Destroy encode thread
 	RecordEncode_ThreadDestroy(&psRecordEngineRes->sEncodeRes);
 	
@@ -207,4 +212,21 @@ RecordEngine_Destroy(
 	free(psRecordEngineRes);
 	return eNM_ERRNO_NONE;
 }
+
+E_NM_ERRNO
+RecordEngine_RegNextMedia(
+	HRECORD hRecord,
+	S_NM_MEDIAWRITE_IF *psMediaIF,
+	void *pvMediaRes,
+	void *pvStatusCBPriv
+)
+{
+	S_RECORD_ENGINE_RES *psRecordEngineRes = (S_RECORD_ENGINE_RES *)hRecord;
+
+	if(psRecordEngineRes == NULL)
+		return eNM_ERRNO_NULL_RES;
+
+	return RecordMux_RegNextMedia(&psRecordEngineRes->sMuxRes, psMediaIF, pvMediaRes, pvStatusCBPriv, true);
+}
+
 

@@ -18,7 +18,7 @@
 #include "N9H26_VPE.h"
 
 #include "VPE.h"
-#include "NuMedia_SAL_OS.h"
+#include "NVTMedia_SAL_OS.h"
 
 #define MAX_TRANS_TIMEOUT		1000		//1s
 

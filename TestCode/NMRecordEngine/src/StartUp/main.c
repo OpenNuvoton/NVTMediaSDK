@@ -1,4 +1,4 @@
-/* @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
+/* @copyright (C) 2020 Nuvoton Technology Corp. All rights reserved.
 * Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
@@ -28,9 +28,6 @@
 
 #include "wblib.h"
 #include "task.h"
-
-#include "NVTMedia.h"
-#include "NVTMedia_SAL_OS.h"
 
 #include "MainTask.h"
 
@@ -138,7 +135,4 @@ static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
 	*ppxTimerTaskStackBuffer = uxTimerTaskStack;
 	*pusTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH; /* In words.  NOT in bytes! */
 }
-
-
-
 

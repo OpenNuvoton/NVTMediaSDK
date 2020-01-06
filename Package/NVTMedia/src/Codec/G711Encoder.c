@@ -29,6 +29,8 @@
 
 #include "NVTMedia.h"
 
+#define MILLISEC_PRE_BLOCK	100			//milli seconds pre each block
+
 typedef struct {
 	uint8_t *pu8TmpBuf;
 	uint32_t u32TmpBufSize;
@@ -290,9 +292,23 @@ G711Enc_Encode(
 	return eNM_ERRNO_NONE;
 }
 
+static E_NM_ERRNO
+G711Enc_CodecAttrGet(
+	S_NM_AUDIO_CTX *psSrcCtx,
+	S_NM_AUDIO_CTX *psDestCtx
+)
+{
+	
+	psDestCtx->u32SamplePerBlock = psSrcCtx->u32SampleRate / MILLISEC_PRE_BLOCK;
+	psSrcCtx->u32SamplePerBlock = psDestCtx->u32SamplePerBlock;
+
+	return eNM_ERRNO_NONE;
+}
+
 S_NM_CODECENC_AUDIO_IF g_sG711EncIF = {
 	.pfnOpenCodec = G711Enc_Open,
 	.pfnCloseCodec = G711Enc_Close,
 
 	.pfnEncodeAudio = G711Enc_Encode,
+	.pfnCodecAttrGet = G711Enc_CodecAttrGet,
 };

@@ -21,35 +21,37 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *****************************************************************************/
+#ifndef __VIDEO_IN_H__
+#define __VIDEO_IN_H__
 
-#ifndef __RENDER_H__
-#define __RENDER_H__
+#define DEF_VIN_MAX_PIPES			4
 
-#include "NVTMedia.h"
+typedef enum {
+	eVIN_COLOR_NONE,
+	eVIN_COLOR_YUV422,
+	eVIN_COLOR_YUV422P,
+	eVIN_COLOR_YUV420P_MB,
+	eVIN_COLOR_YUV420P,
+} E_VIN_COLOR_TYPE;
 
-#define LCD_PANEL_WIDTH		320
-#define LCD_PANEL_HEIGHT	240
-//#define LCD_PANEL_WIDTH		800
-//#define LCD_PANEL_HEIGHT	480
+typedef struct {
+	uint32_t u32Width;
+	uint32_t u32Height;
+	E_VIN_COLOR_TYPE eColorType;
+	uint32_t u32FramePhyAddr;
+	uint32_t u32PipeNo;
+	uint32_t u32FrameBufSize;
+	uint32_t u32FrameRate;
+}S_VIN_PIPE_INFO;
 
 
-int
-Render_Init(
-	uint32_t u32AudioSampleRate,
-	uint32_t u32AudioChannel
-);
+typedef struct {
+	S_VIN_PIPE_INFO sPipeInfo;
+}S_VIN_FRAME_DATA;
 
-void
-Render_VideoFlush(
-	S_NM_VIDEO_CTX	*psVideoCtx
-);
-
-void
-Render_AudioFlush(
-	S_NM_AUDIO_CTX	*psAudioCtx
-);
-
-void
-Render_Final(void);
+typedef struct {
+	S_VIN_PIPE_INFO asVinPipeInfo[DEF_VIN_MAX_PIPES];
+	uint32_t u32NumPipes;
+}S_VIN_CONFIG;
 
 #endif

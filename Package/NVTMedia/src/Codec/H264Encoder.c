@@ -403,11 +403,27 @@ NM_H264Enc_Encode(
 	return eNM_ERRNO_NONE;
 }
 
+static E_NM_ERRNO
+NM_H264Enc_CodecAttrGet(
+	S_NM_VIDEO_CTX *psSrcCtx,
+	S_NM_VIDEO_CTX *psDestCtx
+)
+{
+	S_NM_H264_CTX_PARAM *psCtxParam = NULL;
+	
+	if(psDestCtx->pvParamSet){
+		psCtxParam = (S_NM_H264_CTX_PARAM *)psDestCtx->pvParamSet;
+		psCtxParam->eProfile = eNM_H264_BASELINE;
+	}
+
+	return eNM_ERRNO_NONE;
+}
 
 S_NM_CODECENC_VIDEO_IF g_sH264EncIF = {
 	.pfnOpenCodec = NM_H264Enc_Open,
 	.pfnCloseCodec = NM_H264Enc_Close,
 
 	.pfnEncodeVideo = NM_H264Enc_Encode,
+	.pfnCodecAttrGet = NM_H264Enc_CodecAttrGet,
 };
 

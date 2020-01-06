@@ -117,7 +117,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../inc&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../NuMedia/inc&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../NVTMedia/inc&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/POSIX_FreeRTOS/include&quot;"/>
                                     									

@@ -71,7 +71,7 @@ typedef struct s_record_encode_res{
 	struct s_record_engine_res *psRecordEngRes;
 	
 	S_RECORD_VIDEO_ENCODE_RES sVideoEncodeRes;
-	S_RECORD_AUDIO_ENCODE_RES sAudioEnocdeRes;
+	S_RECORD_AUDIO_ENCODE_RES sAudioEncodeRes;
 
 }S_RECORD_ENCODE_RES;
 
@@ -119,9 +119,23 @@ RecordEngine_Create(
 	void *pvStatusCBPriv
 );
 
+E_NM_ERRNO
+RecordEngine_Destroy(
+	HRECORD hRecord
+);
 
+E_NM_ERRNO
+RecordEncode_Stop(
+	S_RECORD_ENCODE_RES *psEncodeRes
+);
 
-
+E_NM_ERRNO
+RecordEngine_RegNextMedia(
+	HRECORD hRecord,
+	S_NM_MEDIAWRITE_IF *psMediaIF,
+	void *pvMediaRes,
+	void *pvStatusCBPriv
+);
 
 
 #endif

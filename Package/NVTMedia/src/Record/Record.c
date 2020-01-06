@@ -29,6 +29,7 @@
 #include "NVTMedia.h"
 
 #include "NVTMedia_SAL_FS.h"
+#include "RecordEngine.h"
 
 /*
 typedef enum{
@@ -82,6 +83,13 @@ typedef struct{
 	int32_t 	i32MediaHandle;
 	S_NM_MEDIAWRITE_IF *psMediaIF;
 	void *pvMediaRes;
+
+	E_NM_CTX_AUDIO_TYPE eAudioType;
+	E_NM_CTX_VIDEO_TYPE eVideoType;
+
+	void *pvVideoCtxParam;
+	void *pvAudioCtxParam;
+	
 }S_NM_RECORD_OEPN_RES;
 
 
@@ -94,27 +102,62 @@ OpenAVIWriteMedia(
 )
 {
 	E_NM_ERRNO eRet = eNM_ERRNO_NONE;
+	void *pvVideoCtxParam = NULL;
+	void *pvAudioCtxParam = NULL;
+	E_NM_CTX_AUDIO_TYPE eAudioType = psRecordCtx->sMediaAudioCtx.eAudioType;
+	E_NM_CTX_VIDEO_TYPE eVideoType = psRecordCtx->sMediaVideoCtx.eVideoType;
+	
+	if(eVideoType > eNM_CTX_VIDEO_NONE)
+		psRecordIF->psVideoCodecIF = s_apsVideoEncCodecList[eVideoType];
+	if(eAudioType > eNM_CTX_AUDIO_NONE)
+		psRecordIF->psAudioCodecIF = s_apsAudioEncCodecList[eAudioType];
 
+	if(eVideoType == eNM_CTX_VIDEO_H264){
+		pvVideoCtxParam = calloc(1, sizeof(S_NM_H264_CTX_PARAM));
+		
+		if(pvVideoCtxParam == NULL){
+			eRet = eNM_ERRNO_MALLOC;
+			goto OpenAVIWriteMedia_fail;
+		}
+
+		psRecordCtx->sMediaVideoCtx.pvParamSet = pvVideoCtxParam;		
+	}		
+	
+	if((psRecordIF->psVideoCodecIF) && (psRecordIF->psVideoCodecIF->pfnCodecAttrGet))
+		psRecordIF->psVideoCodecIF->pfnCodecAttrGet(&psRecordCtx->sFillVideoCtx, &psRecordCtx->sMediaVideoCtx);
+
+	if((psRecordIF->psAudioCodecIF) && (psRecordIF->psAudioCodecIF->pfnCodecAttrGet))
+		psRecordIF->psAudioCodecIF->pfnCodecAttrGet(&psRecordCtx->sFillAudioCtx, &psRecordCtx->sMediaAudioCtx);
+	
 	eRet = g_sAVIWriterIF.pfnOpenMedia(&psRecordCtx->sMediaVideoCtx, &psRecordCtx->sMediaAudioCtx, psAVIAttr, &psRecordIF->pvMediaRes);
 
 	if(eRet != eNM_ERRNO_NONE)
 		return eRet;
 	
 	psRecordIF->psMediaIF = &g_sAVIWriterIF;	
-
-	if(psRecordCtx->sMediaVideoCtx.eVideoType > eNM_CTX_VIDEO_NONE)
-		psRecordIF->psVideoCodecIF = s_apsVideoEncCodecList[psRecordCtx->sMediaVideoCtx.eVideoType];
-	if(psRecordCtx->sMediaAudioCtx.eAudioType > eNM_CTX_AUDIO_NONE)
-		psRecordIF->psAudioCodecIF = s_apsAudioEncCodecList[psRecordCtx->sMediaAudioCtx.eAudioType];
 	
 	if(psOpenRes){
 		psOpenRes->eMediaFormat = eNM_MEDIA_FORMAT_FILE;
 		psOpenRes->i32MediaHandle = psAVIAttr->i32FD;		
 		psOpenRes->psMediaIF = psRecordIF->psMediaIF; 
 		psOpenRes->pvMediaRes = psRecordIF->pvMediaRes; 
+		psOpenRes->eVideoType = eVideoType;
+		psOpenRes->eAudioType = eAudioType;
+		psOpenRes->pvVideoCtxParam = pvVideoCtxParam;
+		psOpenRes->pvAudioCtxParam = pvAudioCtxParam;		
 	}
 
 	return eNM_ERRNO_NONE;
+
+OpenAVIWriteMedia_fail:
+	
+	if(pvVideoCtxParam)
+		free(pvVideoCtxParam);
+
+	if(pvAudioCtxParam)
+		free(pvAudioCtxParam);
+	
+	return eRet;
 }
 
 
@@ -228,8 +271,7 @@ NMRecord_Close(
 	S_NM_RECORD_OEPN_RES *psOpenRes = NULL;
 
 	if(hRecord != (HRECORD)eNM_INVALID_HANDLE){
-		//TODO
-//		RecordEngine_Destroy(hPlay);
+		RecordEngine_Destroy(hRecord);
 	}
 	
 	if((ppvNMOpenRes == NULL) || (*ppvNMOpenRes == NULL))
@@ -237,6 +279,13 @@ NMRecord_Close(
 		
 	psOpenRes = (S_NM_RECORD_OEPN_RES *)*ppvNMOpenRes;
 
+	//Free context param set which allocate from NMRecord_Open()
+	if(psOpenRes->pvVideoCtxParam)
+		free(psOpenRes->pvVideoCtxParam);
+
+	if(psOpenRes->pvAudioCtxParam)
+		free(psOpenRes->pvAudioCtxParam);
+	
 	//close media
 	if(psOpenRes->pvMediaRes){
 		psOpenRes->psMediaIF->pfnCloseMedia(&psOpenRes->pvMediaRes);
@@ -274,7 +323,33 @@ NMRecord_Record(
 	void *pvStatusCBPriv
 )
 {
-	return  eNM_ERRNO_NONE;
+	if(phRecord == NULL)
+		return eNM_ERRNO_NULL_PTR;
+	
+	*phRecord = (HRECORD)eNM_INVALID_HANDLE;
+	
+	if(psRecordCtx->sFillAudioCtx.u32SamplePerBlock == 0){
+		NMLOG_ERROR("Please check audio fill context u32SamplePerBlock value, according your audio codec specification \n");
+		return eNM_ERRNO_CTX;
+	}
+
+	return RecordEngine_Create(phRecord, u32Duration, psRecordIF, psRecordCtx, pfnStatusCB, pvStatusCBPriv);
 }
+
+E_NM_ERRNO
+NMRecord_RegNextMedia(
+	HRECORD hRecord,
+	S_NM_MEDIAWRITE_IF *psMediaIF,
+	void *pvMediaRes,
+	void *pvStatusCBPriv
+)
+{
+	if(hRecord == (HRECORD)eNM_INVALID_HANDLE)
+		return eNM_ERRNO_NONE;
+
+	return RecordEngine_RegNextMedia(hRecord, psMediaIF, pvMediaRes, pvStatusCBPriv);
+}
+
+
 
 

@@ -44,9 +44,9 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Output\</OutputDirectory>
-          <OutputName>ImgProc</OutputName>
-          <CreateExecutable>0</CreateExecutable>
-          <CreateLib>1</CreateLib>
+          <OutputName>NMRecordEngine</OutputName>
+          <CreateExecutable>1</CreateExecutable>
+          <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
@@ -75,7 +75,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>xcopy /y .\Output\ImgProc.lib ..\..\..\PrebuildLib\N9H26\ARMCC\</UserProg1Name>
+            <UserProg1Name>fromelf.exe --bin --output "$L@L.bin" "$L@L.axf"</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -117,7 +117,7 @@
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
           <Simulator>
-            <UseSimulator>1</UseSimulator>
+            <UseSimulator>0</UseSimulator>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
             <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
@@ -128,7 +128,7 @@
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
           </Simulator>
           <Target>
-            <UseTarget>0</UseTarget>
+            <UseTarget>1</UseTarget>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
             <RunToMain>0</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
@@ -138,7 +138,7 @@
             <RestoreToolbox>1</RestoreToolbox>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>-1</TargetSelection>
+          <TargetSelection>6</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -151,8 +151,8 @@
             <CpuDllArguments></CpuDllArguments>
             <PeripheralDll></PeripheralDll>
             <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-            <Driver></Driver>
+            <InitializationFile>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Script\N9H26\N9H26K5.ini</InitializationFile>
+            <Driver>Segger\JLTAgdi.dll</Driver>
           </TargetDlls>
         </DebugOption>
         <Utilities>
@@ -269,9 +269,9 @@
                 <Size>0x8000</Size>
               </IRAM>
               <IROM>
-                <Type>0</Type>
+                <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <Size>0x4000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -347,9 +347,9 @@
             <uSurpInc>0</uSurpInc>
             <VariousControls>
               <MiscControls>--c99</MiscControls>
-              <Define></Define>
+              <Define>__N9H26__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC</IncludePath>
+              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\..\Package\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -369,7 +369,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -377,10 +377,10 @@
             <useFile>0</useFile>
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0xF8002000</DataAddressRange>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Script\N9H26\N9H26K5.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
-            <Misc></Misc>
+            <Misc>--entry Reset_Go --verbose</Misc>
             <LinkerInputFile></LinkerInputFile>
             <DisabledWarnings></DisabledWarnings>
           </LDads>
@@ -388,17 +388,127 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>src</GroupName>
+          <GroupName>StartUp</GroupName>
           <Files>
             <File>
-              <FileName>ImgProc.c</FileName>
+              <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\src\ImgProc.c</FilePath>
+              <FilePath>..\src\StartUp\main.c</FilePath>
             </File>
             <File>
-              <FileName>VPE.c</FileName>
+              <FileName>multithread.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\src\VPE.c</FilePath>
+              <FilePath>..\src\StartUp\multithread.c</FilePath>
+            </File>
+            <File>
+              <FileName>Retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\StartUp\Retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>standalone.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\StartUp\standalone.c</FilePath>
+            </File>
+            <File>
+              <FileName>wb_init.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\src\StartUp\wb_init.s</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Libs</GroupName>
+          <Files>
+            <File>
+              <FileName>N9H26_SYS_FreeRTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_SYS_FreeRTOS.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_GPIO.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_GPIO.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_SIC.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_SIC.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_H264Codec.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_H264Codec.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_NVTFAT_FREERTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
+            </File>
+            <File>
+              <FileName>POSIX_FreeRTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
+            </File>
+            <File>
+              <FileName>NVTMedia.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\NVTMedia.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_GIANTPLUS_GPM1006D.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_GIANTPLUS_GPM1006D.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_I2C.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_I2C.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_VideoIn.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_VideoIn.lib</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>SAL</GroupName>
+          <Files>
+            <File>
+              <FileName>NVTMedia_SAL_FS.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Package\NVTMedia\src\SAL\NVTMedia_SAL_FS.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MainTask</GroupName>
+          <Files>
+            <File>
+              <FileName>MainTask.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\MainTask\MainTask.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>VideoIn</GroupName>
+          <Files>
+            <File>
+              <FileName>VideoIn.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\VideoIn\VideoIn.c</FilePath>
+            </File>
+            <File>
+              <FileName>SensorNT99141.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\VideoIn\SensorNT99141.c</FilePath>
+            </File>
+            <File>
+              <FileName>DrvI2C.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\VideoIn\DrvI2C.c</FilePath>
             </File>
           </Files>
         </Group>
