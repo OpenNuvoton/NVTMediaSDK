@@ -8,6 +8,7 @@
 #define _MODE_T_DECLARED
 #define _TIMER_T_DECLARED
 #define _CLOCKID_T_DECLARED
+#define _TIME_T_DECLARED
 #endif
 
 #include <stdio.h>
