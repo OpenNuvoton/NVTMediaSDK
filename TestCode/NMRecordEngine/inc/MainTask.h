@@ -25,6 +25,7 @@
 #ifndef __MAIN_TASK_H__
 #define __MAIN_TASK_H__
 
+#define mainMAIN_TASK_PRIORITY		( tskIDLE_PRIORITY + 3 )
 void MainTask( void *pvParameters );
 
 #endif

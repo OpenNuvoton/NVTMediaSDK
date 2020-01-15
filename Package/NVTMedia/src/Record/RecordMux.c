@@ -169,14 +169,26 @@ static void SupplementZeroVideoFrame(
 
 	if(psMuxPriv->u64CurVideoStartTime  == 0){
 		psMuxPriv->u64CurVideoStartTime = psNewPacket->u64DataTime;
+//		NMLOG_INFO("Video start chunk timestamp is %d\n", (uint32_t)psMuxPriv->u64CurVideoStartTime);
 		return;
 	}
 	
+	if(psNewPacket->u64DataTime < psMuxPriv->u64CurVideoStartTime){
+		NMLOG_ERROR("Video chunk timestamp is incorrect \n");
+		return; 
+	}
+	
+//	printf("Video packet time is %d \n", (uint32_t)psNewPacket->u64DataTime);
+
 	u32ExpectFrames = (psNewPacket->u64DataTime - psMuxPriv->u64CurVideoStartTime) / (1000 / u32ExpectFrameRate);
 
 	if(u32ExpectFrames > (psMuxPriv->u32CurVideoChunks + 2))
 		u32SupplementFrames = u32ExpectFrames - (psMuxPriv->u32CurVideoChunks + 2);
 
+	if(u32SupplementFrames){
+		NMLOG_INFO("Supplement %d video frames\n", u32SupplementFrames);
+	}
+	
 	psVideoCtx->pu8DataBuf = psNewPacket->pu8DataPtr;
 	psVideoCtx->u32DataSize = 0;
 	psVideoCtx->u32DataLimit = psNewPacket->u32UsedDataLen;
@@ -205,16 +217,23 @@ static void SupplementZeroAudioFrame(
 
 	if(psMuxPriv->u64CurAudioStartTime  == 0){
 		psMuxPriv->u64CurAudioStartTime = psNewPacket->u64DataTime;
+//		NMLOG_INFO("Audio start chunk timestamp is %d\n", (uint32_t)psMuxPriv->u64CurAudioStartTime);
 		return;
 	}
 
+	if(psNewPacket->u64DataTime < psMuxPriv->u64CurAudioStartTime){
+		NMLOG_ERROR("Audio chunk timestamp is incorrect \n");
+		return; 
+	}
+	
+//	printf("Audio packet time is %d \n", (uint32_t)psNewPacket->u64DataTime);
 	u32ExpectFrames = (psNewPacket->u64DataTime - psMuxPriv->u64CurAudioStartTime) / u32FrameDuration;
 	
 	if(u32ExpectFrames > (psMuxPriv->u32CurAudioChunks + 2))
 		u32SupplementFrames = u32ExpectFrames - (psMuxPriv->u32CurAudioChunks + 2);
 
 	if(u32SupplementFrames){
-		NMLOG_WARNING("Supplement %d audio frames\n", u32SupplementFrames);
+		NMLOG_INFO("Supplement %d audio frames\n", u32SupplementFrames);
 	}
 	
 	psAudioCtx->pu8DataBuf = psNewPacket->pu8DataPtr;
@@ -320,7 +339,8 @@ static void * MuxWorkerThread( void * pvArgs )
 
 			if(psFirstPacket->u64DataTime > (psMuxPriv->u64CurStartRecTime + psMuxRes->u32RecordTimeLimit)){
 				//Switch next media
-				if((bOutputVideoFirst == true) && (psFirstPacket->ePktType & eNMPACKET_IFRAME)){
+				if(((bOutputVideoFirst == true) && (psFirstPacket->ePktType & eNMPACKET_IFRAME)) ||
+					 (pvVideoList == NULL)){
 
 					//Send status notify
 					if(psMuxRes->pfnStatusCB){
@@ -462,7 +482,8 @@ InitMuxPriv(
 	psMuxPriv->sCurrentMedia.pvStatusCBPriv = psMuxRes->pvStatusCBPriv;
 
 	psMuxRes->pvMuxPriv = (void *)psMuxPriv;
-		
+	
+	return eNM_ERRNO_NONE;
 InitMuxPriv_fail:
 	
 	if(psMuxPriv)

@@ -130,7 +130,7 @@
           <Target>
             <UseTarget>1</UseTarget>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>0</RunToMain>
+            <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
@@ -441,11 +441,6 @@
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_H264Codec.lib</FilePath>
             </File>
             <File>
-              <FileName>N9H26_NVTFAT_FREERTOS.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
-            </File>
-            <File>
               <FileName>POSIX_FreeRTOS.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
@@ -470,6 +465,21 @@
               <FileType>4</FileType>
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_VideoIn.lib</FilePath>
             </File>
+            <File>
+              <FileName>N9H26_AUR.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_AUR.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_EDMA.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_EDMA.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_NVTFAT_FREERTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -490,6 +500,11 @@
               <FileType>1</FileType>
               <FilePath>..\src\MainTask\MainTask.c</FilePath>
             </File>
+            <File>
+              <FileName>FileMgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\MainTask\FileMgr.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -509,6 +524,31 @@
               <FileName>DrvI2C.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\VideoIn\DrvI2C.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AudioIn</GroupName>
+          <Files>
+            <File>
+              <FileName>AudioIn.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\AudioIn\AudioIn.c</FilePath>
+            </File>
+            <File>
+              <FileName>AurEDMA.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\AudioIn\AurEDMA.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Render</GroupName>
+          <Files>
+            <File>
+              <FileName>Render.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Render\Render.c</FilePath>
             </File>
           </Files>
         </Group>

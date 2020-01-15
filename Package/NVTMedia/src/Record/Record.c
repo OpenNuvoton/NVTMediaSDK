@@ -72,7 +72,7 @@ typedef enum{
 static S_NM_CODECENC_VIDEO_IF *s_apsVideoEncCodecList[eNM_CTX_VIDEO_END] = {
 	NULL,
 	NULL,
-	NULL,
+	&g_sH264EncIF,
 	NULL,
 	NULL,
 };
@@ -290,7 +290,7 @@ NMRecord_Close(
 	if(psOpenRes->pvMediaRes){
 		psOpenRes->psMediaIF->pfnCloseMedia(&psOpenRes->pvMediaRes);
 	}
-
+	
 	//Add S_NM_RECORD_OEPN_RES argument to close file/stream
 	if((psOpenRes->i32MediaHandle) && (psOpenRes->eMediaFormat == eNM_MEDIA_FORMAT_FILE)){
 		close(psOpenRes->i32MediaHandle);

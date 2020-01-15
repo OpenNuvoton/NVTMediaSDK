@@ -77,6 +77,7 @@ int write(
 
 	if(i32Ret < 0)
 		return i32Ret;
+	
 	return i32WriteCnt;
 }
 

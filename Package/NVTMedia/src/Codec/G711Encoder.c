@@ -299,7 +299,7 @@ G711Enc_CodecAttrGet(
 )
 {
 	
-	psDestCtx->u32SamplePerBlock = psSrcCtx->u32SampleRate / MILLISEC_PRE_BLOCK;
+	psDestCtx->u32SamplePerBlock = psSrcCtx->u32SampleRate * MILLISEC_PRE_BLOCK / 1000;
 	psSrcCtx->u32SamplePerBlock = psDestCtx->u32SamplePerBlock;
 
 	return eNM_ERRNO_NONE;

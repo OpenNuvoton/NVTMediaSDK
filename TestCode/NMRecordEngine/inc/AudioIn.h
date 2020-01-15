@@ -21,64 +21,31 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *****************************************************************************/
-#ifndef __VIDEO_IN_H__
-#define __VIDEO_IN_H__
-
-#define DEF_VIN_MAX_PIPES			4
-
-typedef enum {
-	eVIN_COLOR_NONE,
-	eVIN_COLOR_YUV422,
-	eVIN_COLOR_YUV422P,
-	eVIN_COLOR_YUV420P_MB,
-	eVIN_COLOR_YUV420P,
-} E_VIN_COLOR_TYPE;
+#ifndef __AUDIO_IN_H__
+#define __AUDIO_IN_H__
 
 typedef struct {
-	uint32_t u32Width;
-	uint32_t u32Height;
-	E_VIN_COLOR_TYPE eColorType;
-	uint32_t u32FramePhyAddr;
-	uint32_t u32PipeNo;
-	uint32_t u32FrameBufSize;
-	uint32_t u32FrameRate;
-}S_VIN_PIPE_INFO;
+	uint32_t u32SampleRate;
+	uint32_t u32Channel;
+}S_AIN_INFO;
 
+int32_t AudioIn_DeviceInit(void);
 
-typedef struct {
-	S_VIN_PIPE_INFO sPipeInfo;
-}S_VIN_FRAME_DATA;
-
-typedef struct {
-	S_VIN_PIPE_INFO asVinPipeInfo[DEF_VIN_MAX_PIPES];
-	uint32_t u32NumPipes;
-}S_VIN_CONFIG;
-
-int32_t 
-VideoIn_DeviceInit(void);
-
-void VideoIn_TaskCreate(
+void AudioIn_TaskCreate(
 	void *pvParameters
 );
 
 BOOL
-VideoIn_ReadNextPlanarFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
+AudioIn_ReadFrameData(
+	uint32_t u32ReadSamples,
+	uint8_t *pu8FrameData,
 	uint64_t *pu64FrameTime
 );
 
-BOOL
-VideoIn_ReadNextPacketFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
-	uint64_t *pu64FrameTime
-);
+S_AIN_INFO *
+AudioIn_GetInfo(void);
 
-S_VIN_PIPE_INFO *
-VideoIn_GetPipeInfo(
-	int32_t i32PipeNo
-);
-
+void
+AudioIn_CleanPCMBuff(void);
 
 #endif

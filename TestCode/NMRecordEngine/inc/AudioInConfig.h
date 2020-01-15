@@ -21,64 +21,11 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *****************************************************************************/
-#ifndef __VIDEO_IN_H__
-#define __VIDEO_IN_H__
+#ifndef __AIN_CONFIG_H__
+#define __AIN_CONFIG_H__
 
-#define DEF_VIN_MAX_PIPES			4
-
-typedef enum {
-	eVIN_COLOR_NONE,
-	eVIN_COLOR_YUV422,
-	eVIN_COLOR_YUV422P,
-	eVIN_COLOR_YUV420P_MB,
-	eVIN_COLOR_YUV420P,
-} E_VIN_COLOR_TYPE;
-
-typedef struct {
-	uint32_t u32Width;
-	uint32_t u32Height;
-	E_VIN_COLOR_TYPE eColorType;
-	uint32_t u32FramePhyAddr;
-	uint32_t u32PipeNo;
-	uint32_t u32FrameBufSize;
-	uint32_t u32FrameRate;
-}S_VIN_PIPE_INFO;
-
-
-typedef struct {
-	S_VIN_PIPE_INFO sPipeInfo;
-}S_VIN_FRAME_DATA;
-
-typedef struct {
-	S_VIN_PIPE_INFO asVinPipeInfo[DEF_VIN_MAX_PIPES];
-	uint32_t u32NumPipes;
-}S_VIN_CONFIG;
-
-int32_t 
-VideoIn_DeviceInit(void);
-
-void VideoIn_TaskCreate(
-	void *pvParameters
-);
-
-BOOL
-VideoIn_ReadNextPlanarFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
-	uint64_t *pu64FrameTime
-);
-
-BOOL
-VideoIn_ReadNextPacketFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
-	uint64_t *pu64FrameTime
-);
-
-S_VIN_PIPE_INFO *
-VideoIn_GetPipeInfo(
-	int32_t i32PipeNo
-);
-
+#define AIN_CONFIG_SAMPLERATE						(8000)
+#define AIN_CONFIG_CHANNEL							(1)
+#define AIN_CONFIG_FRAGMENT_DURATION				(100)
 
 #endif

@@ -1085,7 +1085,8 @@ AVIUtility_FinalizeAVIFile(
 
 	AVIUtility_GenListMoviChunkHeader(psAVIHandle);
 	
-	ftruncate(psAVIHandle->i32FileHandle,dw);
+//	ftruncate(psAVIHandle->i32FileHandle,dw);
+	lseek(psAVIHandle->i32FileHandle, dw, SEEK_SET);
 
 	if(psAVIHandle->bIdxUseFile == TRUE){
 		char *szTempFileName = malloc(strlen(szTempFilePath) + 14);
