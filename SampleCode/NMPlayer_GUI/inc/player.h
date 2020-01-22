@@ -8,23 +8,25 @@
 
 #define DEF_PATH_MEDIA_FOLDER "C:\\DCIM\\"
 
-typedef enum {
-		ePlayerCmd_Play,
-		ePlayerCmd_Stop,
-		ePlayerCmd_Seek,
-		ePlayerCmd_Previous,
-		ePlayerCmd_Next,
-		ePlayerCmd_Status,
-		ePlayerCmd_Cnt
+typedef enum
+{
+    ePlayerCmd_Play,
+    ePlayerCmd_Stop,
+    ePlayerCmd_Seek,
+    ePlayerCmd_Previous,
+    ePlayerCmd_Next,
+    ePlayerCmd_Status,
+    ePlayerCmd_Cnt
 } E_PLAYER_CMD;
 
-typedef struct {
-	E_PLAYER_CMD m_ePlayerCmd;
-	void * m_pData;
+typedef struct
+{
+    E_PLAYER_CMD m_ePlayerCmd;
+    void *m_pData;
 } S_PLAYER_CMD;
 
-void * worker_player ( void *pvArgs );
-int player_commander ( S_PLAYER_CMD* psPlayCmd );
+void *worker_player(void *pvArgs);
+int player_commander(S_PLAYER_CMD *psPlayCmd);
 
 int player_start(void);
 int player_stop(void);

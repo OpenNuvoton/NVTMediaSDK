@@ -1,4 +1,4 @@
-//		Copyright (c) 2019 Nuvoton Technology Corp. All rights reserved.
+//      Copyright (c) 2019 Nuvoton Technology Corp. All rights reserved.
 //
 //      This program is free software; you can redistribute it and/or modify
 //      it under the terms of the GNU General Public License as published by
@@ -21,23 +21,23 @@
 #include "NVTMedia.h"
 #include "LCDConf.h"
 
-#define LCD_PANEL_WIDTH		LCD_XSIZE
-#define LCD_PANEL_HEIGHT	LCD_YSIZE
+#define LCD_PANEL_WIDTH     LCD_XSIZE
+#define LCD_PANEL_HEIGHT    LCD_YSIZE
 
 int
 Render_Init(
-	uint32_t u32AudioSampleRate,
-	uint32_t u32AudioChannel
+    uint32_t u32AudioSampleRate,
+    uint32_t u32AudioChannel
 );
 
 void
 Render_VideoFlush(
-	S_NM_VIDEO_CTX	*psVideoCtx
+    S_NM_VIDEO_CTX  *psVideoCtx
 );
 
 void
 Render_AudioFlush(
-	S_NM_AUDIO_CTX	*psAudioCtx
+    S_NM_AUDIO_CTX  *psAudioCtx
 );
 
 void

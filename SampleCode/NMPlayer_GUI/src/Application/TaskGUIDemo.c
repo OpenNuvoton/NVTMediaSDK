@@ -1,6 +1,6 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
-* 
+*
 * Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
 *   3. Neither the name of Nuvoton Technology Corp. nor the names of its contributors
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
-* 
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,98 +48,98 @@
 
 #include "player.h"
 
-#define DEF_IDLE_CNT	100
+#define DEF_IDLE_CNT    100
 static WM_HWIN hWin_Playback = NULL;
-static int i32IdleCnt=0;
+static int i32IdleCnt = 0;
 
 WM_HWIN CreatePlayback(void);
 void update_gui_widgets(WM_HWIN, E_NM_PLAY_STATUS);
 
-static void cbBackgroundWin(WM_MESSAGE* pMsg)
+static void cbBackgroundWin(WM_MESSAGE *pMsg)
 {
-	printf("[%s] msgid=%d, %d->%d \n", __func__, pMsg->MsgId, pMsg->hWinSrc, pMsg->hWin );
-	i32IdleCnt=0;
-	switch (pMsg->MsgId)
-	{
-	case WM_TOUCH: 
-								if ( hWin_Playback ) 
-									WM_ShowWin(hWin_Playback);
+    printf("[%s] msgid=%d, %d->%d \n", __func__, pMsg->MsgId, pMsg->hWinSrc, pMsg->hWin);
+    i32IdleCnt = 0;
+    switch (pMsg->MsgId)
+    {
+    case WM_TOUCH:
+        if (hWin_Playback)
+            WM_ShowWin(hWin_Playback);
 
-								
-								break;
-	case WM_PAINT: 
-								GUI_SetBkColor(DEF_OSD_COLORKEY);
-								GUI_Clear();
-								break;
-	}
-	WM_DefaultProc(pMsg);
+
+        break;
+    case WM_PAINT:
+        GUI_SetBkColor(DEF_OSD_COLORKEY);
+        GUI_Clear();
+        break;
+    }
+    WM_DefaultProc(pMsg);
 }
 
-void * worker_guiman ( void *pvArgs )
+void *worker_guiman(void *pvArgs)
 {
 #ifdef DEF_WITHOUT_GUI
 
-	// Create file list.
-	filelist_create(DEF_PATH_MEDIA_FOLDER );
+    // Create file list.
+    filelist_create(DEF_PATH_MEDIA_FOLDER);
 
-	// Dump media file name in file list.
-	filelist_dump ( );
+    // Dump media file name in file list.
+    filelist_dump();
 
-	player_start();
-	player_play();
+    player_start();
+    player_play();
 
-	while (1)
-	{
-		E_NM_PLAY_STATUS ePlayerStatusNow =  player_status();
-		if ( ePlayerStatusNow == eNM_PLAY_STATUS_EOM )
-		{
-			printf("##########################\n");
-			player_next();
-		}
-		usleep(100000);
-	}
-#else
-	GUI_Init();
-
-		// Hijacking callback of Desktop.
-		WM_SetCallback(WM_HBKWIN, cbBackgroundWin);
-
-		// Fill color key.
-		GUI_SetBkColor(DEF_OSD_COLORKEY);
-		GUI_Clear();
-
-		printf("BKhandle:%d\n", WM_HBKWIN);
-
-		hWin_Playback = CreatePlayback();
-		if ( !hWin_Playback ) goto exit_worker_guiman;
-
-		// Hijacking callback of hWin_Playback.
-		//WM_SetCallback(hWin_Playback, cbBackgroundWin);
-
- 		while (1)
+    while (1)
     {
-			E_NM_PLAY_STATUS ePlayerStatusNow =  player_status();
+        E_NM_PLAY_STATUS ePlayerStatusNow =  player_status();
+        if (ePlayerStatusNow == eNM_PLAY_STATUS_EOM)
+        {
+            printf("##########################\n");
+            player_next();
+        }
+        usleep(100000);
+    }
+#else
+    GUI_Init();
 
-			if ( i32IdleCnt > DEF_IDLE_CNT )
-				WM_HideWindow(hWin_Playback);
-			else
-			{
-				// Update Play & Pause widget & progressbar & time label
-				update_gui_widgets(hWin_Playback, ePlayerStatusNow);				
-			}
+    // Hijacking callback of Desktop.
+    WM_SetCallback(WM_HBKWIN, cbBackgroundWin);
 
-			//printf("ePlayerStatusNow=%d\n", ePlayerStatusNow);
-			// If end of media file, play next.
-			if ( ePlayerStatusNow == eNM_PLAY_STATUS_EOM )
-			{
-				printf("##########################\n");
-				player_next();
-			}
-			i32IdleCnt++;
-			GUI_Delay(100);
-		}
+    // Fill color key.
+    GUI_SetBkColor(DEF_OSD_COLORKEY);
+    GUI_Clear();
+
+    printf("BKhandle:%d\n", WM_HBKWIN);
+
+    hWin_Playback = CreatePlayback();
+    if (!hWin_Playback) goto exit_worker_guiman;
+
+    // Hijacking callback of hWin_Playback.
+    //WM_SetCallback(hWin_Playback, cbBackgroundWin);
+
+    while (1)
+    {
+        E_NM_PLAY_STATUS ePlayerStatusNow =  player_status();
+
+        if (i32IdleCnt > DEF_IDLE_CNT)
+            WM_HideWindow(hWin_Playback);
+        else
+        {
+            // Update Play & Pause widget & progressbar & time label
+            update_gui_widgets(hWin_Playback, ePlayerStatusNow);
+        }
+
+        //printf("ePlayerStatusNow=%d\n", ePlayerStatusNow);
+        // If end of media file, play next.
+        if (ePlayerStatusNow == eNM_PLAY_STATUS_EOM)
+        {
+            printf("##########################\n");
+            player_next();
+        }
+        i32IdleCnt++;
+        GUI_Delay(100);
+    }
 #endif
 
 exit_worker_guiman:
-		return NULL;
+    return NULL;
 }

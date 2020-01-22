@@ -16,9 +16,9 @@ source code may not be used to write a similar product. This file may
 only be used in accordance with the following terms:
 
 The  software has  been licensed by SEGGER Software GmbH to Nuvoton Technology Corporationat the address: No. 4, Creation Rd. III, Hsinchu Science Park, Taiwan
-for the purposes  of  creating  libraries  for its 
+for the purposes  of  creating  libraries  for its
 Arm Cortex-M and  Arm9 32-bit microcontrollers, commercialized and distributed by Nuvoton Technology Corporation
-under  the terms and conditions  of  an  End  User  
+under  the terms and conditions  of  an  End  User
 License  Agreement  supplied  with  the libraries.
 Full source code is available at: www.segger.com
 
@@ -92,25 +92,25 @@ Purpose     : Display controller configuration (single layer)
 **********************************************************************
 */
 #ifndef   VXSIZE_PHYS
-#define VXSIZE_PHYS XSIZE_PHYS
+    #define VXSIZE_PHYS XSIZE_PHYS
 #endif
 #ifndef   VYSIZE_PHYS
-#define VYSIZE_PHYS YSIZE_PHYS
+    #define VYSIZE_PHYS YSIZE_PHYS
 #endif
 #ifndef   XSIZE_PHYS
-#error Physical X size of display is not defined!
+    #error Physical X size of display is not defined!
 #endif
 #ifndef   YSIZE_PHYS
-#error Physical Y size of display is not defined!
+    #error Physical Y size of display is not defined!
 #endif
 #ifndef   COLOR_CONVERSION
-#error Color conversion not defined!
+    #error Color conversion not defined!
 #endif
 #ifndef   DISPLAY_DRIVER
-#error No display driver defined!
+    #error No display driver defined!
 #endif
 #ifndef   DISPLAY_ORIENTATION
-#define DISPLAY_ORIENTATION 0
+    #define DISPLAY_ORIENTATION 0
 #endif
 
 // Touch panel
@@ -154,7 +154,7 @@ int  GUI_TOUCH_X_MeasureY(void)
 {
     int sumx;
     int sumy;
-    if ( Read_TouchPanel(&sumx, &sumy) )
+    if (Read_TouchPanel(&sumx, &sumy))
     {
         sysprintf("Y = %d\n", sumy);
         ts_phy2log(&sumx, &sumy);
@@ -171,26 +171,26 @@ int  GUI_TOUCH_X_MeasureY(void)
 *   display driver configuration.
 *
 */
-#define DEF_MAPTO_OSD	1
+#define DEF_MAPTO_OSD   1
 
 #ifdef __ICCARM__
-#pragma data_alignment = 32
-UINT8 u8FrameBuf_VIDEO[LCD_XSIZE*LCD_YSIZE*2];
-#if DEF_MAPTO_OSD
-UINT8 u8FrameBuf_OSD[LCD_XSIZE*LCD_YSIZE*2];
-#endif
+    #pragma data_alignment = 32
+    UINT8 u8FrameBuf_VIDEO[LCD_XSIZE * LCD_YSIZE * 2];
+    #if DEF_MAPTO_OSD
+        UINT8 u8FrameBuf_OSD[LCD_XSIZE * LCD_YSIZE * 2];
+    #endif
 #else
-UINT8 u8FrameBuf_VIDEO[LCD_XSIZE*LCD_YSIZE*2] __attribute__((aligned(32)));
-#if DEF_MAPTO_OSD
-UINT8 u8FrameBuf_OSD[LCD_XSIZE*LCD_YSIZE*2] __attribute__((aligned(32)));
-#endif
+    UINT8 u8FrameBuf_VIDEO[LCD_XSIZE * LCD_YSIZE * 2] __attribute__((aligned(32)));
+    #if DEF_MAPTO_OSD
+        UINT8 u8FrameBuf_OSD[LCD_XSIZE * LCD_YSIZE * 2] __attribute__((aligned(32)));
+    #endif
 #endif
 
 UINT8 *pu8UIBufPtr = NULL;
 UINT8 *pu8UIBufPtr_noncacheable = NULL;
 VOID *pvUIBufAddr = NULL;
 UINT8 *pu8FrameBufPtr_nocache = NULL;
-uint8_t * pu8VideoBufPtr = NULL;
+uint8_t *pu8VideoBufPtr = NULL;
 
 void LCD_X_Config(void)
 {
@@ -205,22 +205,22 @@ void LCD_X_Config(void)
     GUI_DEVICE_CreateAndLink(DISPLAY_DRIVER, COLOR_CONVERSION, 0, 0);
     if (LCD_GetSwapXY())
     {
-        LCD_SetSizeEx (0, YSIZE_PHYS, XSIZE_PHYS);
+        LCD_SetSizeEx(0, YSIZE_PHYS, XSIZE_PHYS);
         LCD_SetVSizeEx(0, YSIZE_PHYS * NUM_VSCREENS, XSIZE_PHYS);
     }
     else
     {
-        LCD_SetSizeEx (0, XSIZE_PHYS, YSIZE_PHYS);
+        LCD_SetSizeEx(0, XSIZE_PHYS, YSIZE_PHYS);
         LCD_SetVSizeEx(0, XSIZE_PHYS, YSIZE_PHYS * NUM_VSCREENS);
     }
 #if DEF_MAPTO_OSD
-	pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_OSD | 0x80000000);
+    pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_OSD | 0x80000000);
 #else
-	pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_VIDEO | 0x80000000);
+    pu8UIBufPtr_noncacheable = (UINT8 *)((UINT32)u8FrameBuf_VIDEO | 0x80000000);
 #endif
-	pvUIBufAddr = (void*)pu8UIBufPtr_noncacheable;
-		
-	LCD_SetVRAMAddrEx(0, (void *)pu8UIBufPtr_noncacheable);
+    pvUIBufAddr = (void *)pu8UIBufPtr_noncacheable;
+
+    LCD_SetVRAMAddrEx(0, (void *)pu8UIBufPtr_noncacheable);
     //
     // Set user palette data (only required if no fixed palette is used)
     //
@@ -240,69 +240,69 @@ void VPOST_InterruptServicerRoutine();
 
 void VPOST_VIDEO_Init()
 {
-	LCDFORMATEX lcdFormat;
-	int fillsize=0;
-	uint8_t* pu8FrameBuffer = (uint8_t*)&u8FrameBuf_VIDEO[0];
-	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
-	lcdFormat.nScreenWidth = LCD_XSIZE;
-	lcdFormat.nScreenHeight = LCD_YSIZE;
+    LCDFORMATEX lcdFormat;
+    int fillsize = 0;
+    uint8_t *pu8FrameBuffer = (uint8_t *)&u8FrameBuf_VIDEO[0];
+    lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
+    lcdFormat.nScreenWidth = LCD_XSIZE;
+    lcdFormat.nScreenHeight = LCD_YSIZE;
 
-	pu8VideoBufPtr = (uint8_t *)((UINT32)pu8FrameBuffer);
+    pu8VideoBufPtr = (uint8_t *)((UINT32)pu8FrameBuffer);
 
-	wmemset ( (wchar_t *)pu8VideoBufPtr, 0x80008000, (LCD_XSIZE*LCD_YSIZE*2/sizeof(wchar_t)) );
-	
-	vpostLCMInit(&lcdFormat, (UINT32*)pu8FrameBuffer);	
+    wmemset((wchar_t *)pu8VideoBufPtr, 0x80008000, (LCD_XSIZE * LCD_YSIZE * 2 / sizeof(wchar_t)));
+
+    vpostLCMInit(&lcdFormat, (UINT32 *)pu8FrameBuffer);
 }
 
 static uint16_t rgb888torgb565(uint32_t u32rgb888Pixel)
 {
-	uint8_t *rgb888Pixel = (uint8_t *)&u32rgb888Pixel;
-  uint8_t red   = rgb888Pixel[0];
-  uint8_t green = rgb888Pixel[1];
-  uint8_t blue  = rgb888Pixel[2];
+    uint8_t *rgb888Pixel = (uint8_t *)&u32rgb888Pixel;
+    uint8_t red   = rgb888Pixel[0];
+    uint8_t green = rgb888Pixel[1];
+    uint8_t blue  = rgb888Pixel[2];
 
-  uint16_t b = (blue >> 3) & 0x1f;
-  uint16_t g = ((green >> 2) & 0x3f) << 5;
-  uint16_t r = ((red >> 3) & 0x1f) << 11;
+    uint16_t b = (blue >> 3) & 0x1f;
+    uint16_t g = ((green >> 2) & 0x3f) << 5;
+    uint16_t r = ((red >> 3) & 0x1f) << 11;
 
-  return (uint16_t) (r | g | b);
+    return (uint16_t)(r | g | b);
 }
 
 void VPOST_OSD_Init()
 {
-	volatile UINT32 tmp = (UINT32)u8FrameBuf_OSD;
-	S_DRVVPOST_OSD_SIZE sSize = {LCD_YSIZE, LCD_XSIZE};
-	S_DRVVPOST_OSD_POS sPos = {LCD_YSIZE, LCD_XSIZE, 0, (LCD_YSIZE-1), 0, 0, (LCD_XSIZE-1), 0, };		
-	S_DRVVPOST_OSD sOSD;
-	
-	sOSD.eType  = eDRVVPOST_OSD_RGB565;
-	sOSD.psPos  = &sPos;
-	sOSD.psSize = &sSize;
-	
-	vpostSetOSD_DataType(sOSD.eType);	
-	vpostSetOSD_BaseAddress ( (UINT32)u8FrameBuf_OSD );
-	vpostSetOSD_Size(sOSD.psSize);
-	vpostSetOSD_Pos(sOSD.psPos);
-	vpostSetOSD_Enable();
+    volatile UINT32 tmp = (UINT32)u8FrameBuf_OSD;
+    S_DRVVPOST_OSD_SIZE sSize = {LCD_YSIZE, LCD_XSIZE};
+    S_DRVVPOST_OSD_POS sPos = {LCD_YSIZE, LCD_XSIZE, 0, (LCD_YSIZE - 1), 0, 0, (LCD_XSIZE - 1), 0, };
+    S_DRVVPOST_OSD sOSD;
 
-	vpostSetOSD_Transparent_Enable();
-	vpostSetOSD_Transparent(eDRVVPOST_OSD_TRANSPARENT_RGB565, rgb888torgb565(DEF_OSD_COLORKEY));
+    sOSD.eType  = eDRVVPOST_OSD_RGB565;
+    sOSD.psPos  = &sPos;
+    sOSD.psSize = &sSize;
+
+    vpostSetOSD_DataType(sOSD.eType);
+    vpostSetOSD_BaseAddress((UINT32)u8FrameBuf_OSD);
+    vpostSetOSD_Size(sOSD.psSize);
+    vpostSetOSD_Pos(sOSD.psPos);
+    vpostSetOSD_Enable();
+
+    vpostSetOSD_Transparent_Enable();
+    vpostSetOSD_Transparent(eDRVVPOST_OSD_TRANSPARENT_RGB565, rgb888torgb565(DEF_OSD_COLORKEY));
 }
 
 void Display_Init()
 {
-	VPOST_VIDEO_Init();
+    VPOST_VIDEO_Init();
 
 #ifndef DEF_WITHOUT_GUI
-	#if DEF_MAPTO_OSD
-		VPOST_OSD_Init();
-	#endif
+#if DEF_MAPTO_OSD
+    VPOST_OSD_Init();
+#endif
 #endif
 }
 
 void Display_Fini()
 {
-	vpostLCMDeinit();
+    vpostLCMDeinit();
 }
 
 /*********************************************************************
@@ -321,7 +321,7 @@ void Display_Fini()
 *   Cmd        - Please refer to the details in the switch statement below
 *   pData      - Pointer to a LCD_X_DATA structure
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData)
+int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void *pData)
 {
     int r;
 
@@ -338,20 +338,20 @@ int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData)
         // controller is not initialized by any external routine this needs
         // to be adapted by the customer...
         //
-    	return 0;
+        return 0;
     }
     case LCD_X_SETVRAMADDR:
     {
-        LCD_X_SETVRAMADDR_INFO * p = (LCD_X_SETVRAMADDR_INFO *)pData;
+        LCD_X_SETVRAMADDR_INFO *p = (LCD_X_SETVRAMADDR_INFO *)pData;
         GUI_USE_PARA(p);
-		return 0;
+        return 0;
     }
     case LCD_X_SETORG:
     {
         //
         // Required for setting the display origin which is passed in the 'xPos' and 'yPos' element of p
         //
-        LCD_X_SETORG_INFO * p = (LCD_X_SETORG_INFO *)pData;
+        LCD_X_SETORG_INFO *p = (LCD_X_SETORG_INFO *)pData;
         GUI_USE_PARA(p);
         //...
         return 0;
@@ -361,7 +361,7 @@ int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData)
         //
         // Required if multiple buffers are used. The 'Index' element of p contains the buffer index.
         //
-        LCD_X_SHOWBUFFER_INFO * p;
+        LCD_X_SHOWBUFFER_INFO *p;
         p = (LCD_X_SHOWBUFFER_INFO *)pData;
         GUI_USE_PARA(p);
         //...
@@ -372,7 +372,7 @@ int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData)
         //
         // Required for setting a lookup table entry which is passed in the 'Pos' and 'Color' element of p
         //
-        LCD_X_SETLUTENTRY_INFO * p;
+        LCD_X_SETLUTENTRY_INFO *p;
         p = (LCD_X_SETLUTENTRY_INFO *)pData;
         GUI_USE_PARA(p);
         //...

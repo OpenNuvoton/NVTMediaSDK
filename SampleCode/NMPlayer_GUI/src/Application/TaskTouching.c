@@ -1,6 +1,6 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
-* 
+*
 * Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
 *   3. Neither the name of Nuvoton Technology Corp. nor the names of its contributors
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
-* 
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -54,73 +54,73 @@ extern void TouchTask(void);
 
 static int TouchScreen_Calibrate(void)
 {
-	char szFileName[32];
-	char szCalibrationFile[64];
-	int hFile;
+    char szFileName[32];
+    char szCalibrationFile[64];
+    int hFile;
 
-	// Initialize
-	Init_TouchPanel();
+    // Initialize
+    Init_TouchPanel();
 
-	sprintf(szFileName, "C:\\ts_calib");
-	fsAsciiToUnicode(szFileName, szCalibrationFile, TRUE);
+    sprintf(szFileName, "C:\\ts_calib");
+    fsAsciiToUnicode(szFileName, szCalibrationFile, TRUE);
 
 #if 0
-	// Calibration function test.
-	hFile = fsDeleteFile(szCalibrationFile, NULL);
-	fsFlushIOCache();
-	printf("Deleted %s. %x\n", szFileName, hFile);
+    // Calibration function test.
+    hFile = fsDeleteFile(szCalibrationFile, NULL);
+    fsFlushIOCache();
+    printf("Deleted %s. %x\n", szFileName, hFile);
 #endif
-	
-	hFile = fsOpenFile(szCalibrationFile, szFileName, O_RDONLY | O_FSEEK);
-	printf("file = %d\n", hFile);
-	if (hFile < 0)
-	{
-			// file does not exists, so do calibration
-			hFile = fsOpenFile(szCalibrationFile, szFileName, O_CREATE|O_RDWR | O_FSEEK);
-			if ( hFile < 0 )
-			{
-					printf("CANNOT create the calibration file\n");
-					goto exit_do_calibrate;
-			}
-			fsFlushIOCache();
-			GUI_Init();
-			ts_calibrate(LCD_XSIZE, LCD_YSIZE);
-			ts_writefile(hFile);
-			fsFlushIOCache();
-	}
-	else
-			ts_readfile(hFile);
-	
-	fsCloseFile(hFile);
-	
-	return 0;
-	
+
+    hFile = fsOpenFile(szCalibrationFile, szFileName, O_RDONLY | O_FSEEK);
+    printf("file = %d\n", hFile);
+    if (hFile < 0)
+    {
+        // file does not exists, so do calibration
+        hFile = fsOpenFile(szCalibrationFile, szFileName, O_CREATE | O_RDWR | O_FSEEK);
+        if (hFile < 0)
+        {
+            printf("CANNOT create the calibration file\n");
+            goto exit_do_calibrate;
+        }
+        fsFlushIOCache();
+        GUI_Init();
+        ts_calibrate(LCD_XSIZE, LCD_YSIZE);
+        ts_writefile(hFile);
+        fsFlushIOCache();
+    }
+    else
+        ts_readfile(hFile);
+
+    fsCloseFile(hFile);
+
+    return 0;
+
 exit_do_calibrate:
-	return -1;
+    return -1;
 }
 
-extern void * worker_guiman ( void *pvArgs );
-void * worker_touching ( void *pvArgs )
+extern void *worker_guiman(void *pvArgs);
+void *worker_touching(void *pvArgs)
 {
-	int ret = TouchScreen_Calibrate();
-	pthread_t pxID_worker_guiman;
-	pthread_attr_t	gui_attr;
-	
-	if ( ret < 0 )
-		goto exit_worker_touching;
-	
-	pthread_attr_init(&gui_attr);
-	pthread_attr_setstacksize(&gui_attr, 32*1024);
-	
-	pthread_create( &pxID_worker_guiman, &gui_attr, worker_guiman, NULL );
+    int ret = TouchScreen_Calibrate();
+    pthread_t pxID_worker_guiman;
+    pthread_attr_t  gui_attr;
 
-	while(1)
-	{
-		usleep(1000);	//1ms
-		TouchTask();
-	}
+    if (ret < 0)
+        goto exit_worker_touching;
 
-exit_worker_touching:	
-	return NULL;
+    pthread_attr_init(&gui_attr);
+    pthread_attr_setstacksize(&gui_attr, 32 * 1024);
+
+    pthread_create(&pxID_worker_guiman, &gui_attr, worker_guiman, NULL);
+
+    while (1)
+    {
+        usleep(1000);   //1ms
+        TouchTask();
+    }
+
+exit_worker_touching:
+    return NULL;
 }
 #endif

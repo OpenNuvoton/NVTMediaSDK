@@ -1,6 +1,6 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
-* 
+*
 * Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
 *   3. Neither the name of Nuvoton Technology Corp. nor the names of its contributors
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
-* 
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,8 +30,8 @@
 #include <inttypes.h>
 
 #include "Render.h"
-#include "PCMPlayback.h"
 
+#include "PCMPlayback.h"
 #include "N9H26_VPOST.h"
 
 static uint8_t *s_pu8CurFBAddr;
@@ -39,7 +39,7 @@ extern UINT8 *pu8VideoBufPtr;
 
 void VPOST_InterruptServicerRoutine()
 {
-	vpostSetFrameBuffer((uint32_t)s_pu8CurFBAddr);
+    vpostSetFrameBuffer((uint32_t)s_pu8CurFBAddr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,93 +51,106 @@ uint32_t s_u32DataLenInPCMBuf;
 
 void
 Render_VideoFlush(
-	S_NM_VIDEO_CTX	*psVideoCtx
+    S_NM_VIDEO_CTX  *psVideoCtx
 )
 {
-		//uint64_t u64CurTime;
-		//u64CurTime = NMUtil_GetTimeMilliSec();
-		//printf("Render_VideoFlush %d, %d\n", (uint32_t)u64CurTime, (uint32_t)psVideoCtx->u64DataTime);
+    //uint64_t u64CurTime;
+    //u64CurTime = NMUtil_GetTimeMilliSec();
+    //printf("Render_VideoFlush %d, %d\n", (uint32_t)u64CurTime, (uint32_t)psVideoCtx->u64DataTime);
 
-		s_pu8CurFBAddr = psVideoCtx->pu8DataBuf;
+    s_pu8CurFBAddr = psVideoCtx->pu8DataBuf;
 }
 
 void
 Render_AudioFlush(
-	S_NM_AUDIO_CTX	*psAudioCtx
+    S_NM_AUDIO_CTX  *psAudioCtx
 )
 {
-	uint64_t u64CurTime;
-	u64CurTime = NMUtil_GetTimeMilliSec();
-//	printf("Render_AudioFlush %d, %d\n", (uint32_t)u64CurTime, (uint32_t)psAudioCtx->u64DataTime);
+    uint64_t u64CurTime;
+    u64CurTime = NMUtil_GetTimeMilliSec();
+    //printf("Render_AudioFlush %d, %d %dbytes\n", (uint32_t)u64CurTime, (uint32_t)psAudioCtx->u64DataTime, psAudioCtx->u32DataSize);
 
-	if(psAudioCtx->u32DataSize <= s_u32PCMPlaybackBufSize - s_u32DataLenInPCMBuf){
-		memcpy(s_pu8PCMPlaybackBuf + s_u32DataLenInPCMBuf, psAudioCtx->pu8DataBuf, psAudioCtx->u32DataSize);
-		s_u32DataLenInPCMBuf += psAudioCtx->u32DataSize;
-	}
-	else{
-		NMLOG_INFO("No buffer space for PCM data psG711DecFrame->u32FrameSize %d, u32DataLenInPCMBuf %d\n", psAudioCtx->u32DataSize, s_u32DataLenInPCMBuf);
-	}
+    if (psAudioCtx->u32DataSize <= s_u32PCMPlaybackBufSize - s_u32DataLenInPCMBuf)
+    {
+        memcpy(s_pu8PCMPlaybackBuf + s_u32DataLenInPCMBuf, psAudioCtx->pu8DataBuf, psAudioCtx->u32DataSize);
+        s_u32DataLenInPCMBuf += psAudioCtx->u32DataSize;
+    }
+    else
+    {
+        NMLOG_INFO("No buffer space for PCM data psG711DecFrame->u32FrameSize %d, u32DataLenInPCMBuf %d\n", psAudioCtx->u32DataSize, s_u32DataLenInPCMBuf);
+    }
 
-	if(s_u32DataLenInPCMBuf){
-		PCMPlayback_Send(s_pu8PCMPlaybackBuf, &s_u32DataLenInPCMBuf);
-	}
+    if (s_u32DataLenInPCMBuf)
+    {
+        PCMPlayback_Send(s_pu8PCMPlaybackBuf, &s_u32DataLenInPCMBuf);
+    }
+
 }
 
 int
 Render_Init(
-	uint32_t u32AudioSampleRate,
-	uint32_t u32AudioChannel
+    uint32_t u32AudioSampleRate,
+    uint32_t u32AudioChannel
 )
 {
-	uint32_t u32SPUFragSize;
-	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
+    uint32_t u32SPUFragSize;
+    PFN_DRVVPOST_INT_CALLBACK fun_ptr;
+    int ret = 0;
 
-	s_pu8CurFBAddr = pu8VideoBufPtr ;
+    printf("[%s %d]\n", __func__, __LINE__);
 
-	//Init VPOST
-	vpostInstallCallBack(eDRVVPOST_VINT, (PFN_DRVVPOST_INT_CALLBACK)VPOST_InterruptServicerRoutine,  (PFN_DRVVPOST_INT_CALLBACK*)&fun_ptr);
-	vpostEnableInt(eDRVVPOST_VINT);	
-	sysEnableInterrupt(IRQ_VPOST);
-		
-	//Enable SPU
-	if(PCMPlayback_Start(u32AudioSampleRate, u32AudioChannel, 80, &u32SPUFragSize) != 0){
-		printf("Unable start PCM playback \n");
-		//Wayne vpostLCMDeinit();
-		return -1;
-	}
+    s_pu8CurFBAddr = pu8VideoBufPtr ;
 
-	s_u32PCMPlaybackBufSize = u32AudioSampleRate * u32AudioChannel * 2;	//1Sec buffer size
-	s_pu8PCMPlaybackBuf = malloc(s_u32PCMPlaybackBufSize);
-	s_u32DataLenInPCMBuf = 0;
-	
-	if(s_pu8PCMPlaybackBuf == NULL){
-		printf("Unable allocate playback buffer\n");
-		PCMPlayback_Stop();
-		//Wayne vpostLCMDeinit();
-		return -2;
-	}
-	
-	return 0;
+    //Init VPOST
+    vpostInstallCallBack(eDRVVPOST_VINT, (PFN_DRVVPOST_INT_CALLBACK)VPOST_InterruptServicerRoutine, (PFN_DRVVPOST_INT_CALLBACK *)&fun_ptr);
+    vpostEnableInt(eDRVVPOST_VINT);
+    sysEnableInterrupt(IRQ_VPOST);
+
+    //Enable SPU
+    if (PCMPlayback_Start(u32AudioSampleRate, u32AudioChannel, 80, &u32SPUFragSize) != 0)
+    {
+        printf("Unable start PCM playback \n");
+        ret = -1;
+        goto exit_Render_Init;
+    }
+
+    s_u32PCMPlaybackBufSize = u32AudioSampleRate * u32AudioChannel * 2; //1Sec buffer size
+    s_pu8PCMPlaybackBuf = malloc(s_u32PCMPlaybackBufSize);
+    s_u32DataLenInPCMBuf = 0;
+
+    if (s_pu8PCMPlaybackBuf == NULL)
+    {
+        printf("Unable allocate playback buffer\n");
+        PCMPlayback_Stop();
+        ret = -2;
+        goto exit_Render_Init;
+    }
+
+    printf("[%s %d]\n", __func__, __LINE__);
+
+exit_Render_Init:
+    printf("[%s %d]\n", __func__, __LINE__);
+
+    return ret;
 }
 
 void
 Render_Final(void)
-{	
-	sysDisableInterrupt(IRQ_VPOST);
+{
+    printf("[%s %d]\n", __func__, __LINE__);
+    if (s_pu8PCMPlaybackBuf)
+    {
+        PCMPlayback_Stop();
+        free(s_pu8PCMPlaybackBuf);
+        s_pu8PCMPlaybackBuf = NULL;
+        s_u32PCMPlaybackBufSize = 0;
+    }
 
-	vpostDisableInt(eDRVVPOST_VINT);	
+    printf("[%s %d]\n", __func__, __LINE__);
 
-	vpostSetFrameBuffer((uint32_t)pu8VideoBufPtr);
-	
-	if(s_pu8PCMPlaybackBuf){
-		PCMPlayback_Stop();
-		free(s_pu8PCMPlaybackBuf);
-		s_pu8PCMPlaybackBuf = NULL;
-		s_u32PCMPlaybackBufSize = 0;
-	}
+    sysDisableInterrupt(IRQ_VPOST);
+    vpostDisableInt(eDRVVPOST_VINT);
+    vpostSetFrameBuffer((uint32_t)pu8VideoBufPtr);
+
+    printf("[%s %d]\n", __func__, __LINE__);
 }
-
-
-
-
-

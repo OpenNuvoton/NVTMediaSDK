@@ -1,6 +1,6 @@
 /**************************************************************************//**
 * @copyright (C) 2019 Nuvoton Technology Corp. All rights reserved.
-* 
+*
 * Redistribution and use in source and binary forms, with or without modification,
 * are permitted provided that the following conditions are met:
 *   1. Redistributions of source code must retain the above copyright notice,
@@ -11,7 +11,7 @@
 *   3. Neither the name of Nuvoton Technology Corp. nor the names of its contributors
 *      may be used to endorse or promote products derived from this software
 *      without specific prior written permission.
-* 
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,9 +40,9 @@ int Init_TouchPanel(void)
 int Read_TouchPanel(int *x, int *y)
 {
     unsigned short adc_x, adc_y;
-    if(IsPenDown()==TRUE)
+    if (IsPenDown() == TRUE)
     {
-        if ( adc_read(0, (unsigned short *)&adc_x, (unsigned short *)&adc_y) == 1)
+        if (adc_read(0, (unsigned short *)&adc_x, (unsigned short *)&adc_y) == 1)
         {
             *x = adc_x;
             *y = adc_y;
@@ -64,9 +64,9 @@ void TouchTask(void)
     static U16 yOld;
     static U8  PressedOld = 0;
     int x, y, xDiff, yDiff;
-		int32_t g_i32X, g_i32Y;
+    int32_t g_i32X, g_i32Y;
 
-		int  Pressed = Read_TouchPanel(&g_i32X, &g_i32Y);
+    int  Pressed = Read_TouchPanel(&g_i32X, &g_i32Y);
     /* Touch screen is pressed */
     if (Pressed)
     {

@@ -47,17 +47,17 @@ int perform_calibration(calibration *cal)
     float det, a, b, c, e, f, i;
     float scaling = 65536.0;
 
-    int nn,nx,ny,nx2,ny2, nxy;
+    int nn, nx, ny, nx2, ny2, nxy;
 // Get sums for matrix
     n = x = y = x2 = y2 = xy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         n += 1.0;
         x += (float)cal->x[j];
         y += (float)cal->y[j];
-        x2 += (float)(cal->x[j]*cal->x[j]);
-        y2 += (float)(cal->y[j]*cal->y[j]);
-        xy += (float)(cal->x[j]*cal->y[j]);
+        x2 += (float)(cal->x[j] * cal->x[j]);
+        y2 += (float)(cal->y[j] * cal->y[j]);
+        xy += (float)(cal->x[j] * cal->y[j]);
     }
     nn = (int)n;
     nx = (int)x;
@@ -65,66 +65,66 @@ int perform_calibration(calibration *cal)
     nx2 = (int)x2;
     ny2 = (int)y2;
     nxy = (int)xy;
-    sysprintf("n=%d,x=%d,y=%d,x2=%d,y2=%d, xy=%d\n",nn,nx,ny,nx2,ny2,nxy);
+    sysprintf("n=%d,x=%d,y=%d,x2=%d,y2=%d, xy=%d\n", nn, nx, ny, nx2, ny2, nxy);
 // Get determinant of matrix -- check if determinant is too small
-    det = n*(x2*y2 - xy*xy) + x*(xy*y - x*y2) + y*(x*xy - y*x2);
-    if(det < 0.1 && det > -0.1)
+    det = n * (x2 * y2 - xy * xy) + x * (xy * y - x * y2) + y * (x * xy - y * x2);
+    if (det < 0.1 && det > -0.1)
     {
-        sysprintf("ts_calibrate: determinant is too small -- %f\n",det);
+        sysprintf("ts_calibrate: determinant is too small -- %f\n", det);
         return 0;
     }
 
 // Get elements of inverse matrix
-    a = (x2*y2 - xy*xy)/det;
-    b = (xy*y - x*y2)/det;
-    c = (x*xy - y*x2)/det;
-    e = (n*y2 - y*y)/det;
-    f = (x*y - n*xy)/det;
-    i = (n*x2 - x*x)/det;
+    a = (x2 * y2 - xy * xy) / det;
+    b = (xy * y - x * y2) / det;
+    c = (x * xy - y * x2) / det;
+    e = (n * y2 - y * y) / det;
+    f = (x * y - n * xy) / det;
+    i = (n * x2 - x * x) / det;
 
 // Get sums for x calibration
     z = zx = zy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         z += (float)cal->xfb[j];
-        zx += (float)(cal->xfb[j]*cal->x[j]);
-        zy += (float)(cal->xfb[j]*cal->y[j]);
+        zx += (float)(cal->xfb[j] * cal->x[j]);
+        zy += (float)(cal->xfb[j] * cal->y[j]);
     }
 
 // Now multiply out to get the calibration for framebuffer x coord
-    cal->a[0] = (int)((a*z + b*zx + c*zy)*(scaling));
-    cal->a[1] = (int)((b*z + e*zx + f*zy)*(scaling));
-    cal->a[2] = (int)((c*z + f*zx + i*zy)*(scaling));
+    cal->a[0] = (int)((a * z + b * zx + c * zy) * (scaling));
+    cal->a[1] = (int)((b * z + e * zx + f * zy) * (scaling));
+    cal->a[2] = (int)((c * z + f * zx + i * zy) * (scaling));
 #if  1 //close
-    nn = (int)((a*z + b*zx + c*zy)*(scaling));
-    nx = (int)((b*z + e*zx + f*zy)*(scaling));
-    ny = (int)((c*z + f*zx + i*zy)*(scaling));
+    nn = (int)((a * z + b * zx + c * zy) * (scaling));
+    nx = (int)((b * z + e * zx + f * zy) * (scaling));
+    ny = (int)((c * z + f * zx + i * zy) * (scaling));
 //  nn = (int)(a*z + b*zx + c*zy);
 //  nx = (int) (b*z + e*zx + f*zy);
 //  ny = (int) (c*z + f*zx + i*zy);
-    sysprintf("%d %d %d\n",nn,nx,ny);
+    sysprintf("%d %d %d\n", nn, nx, ny);
 #endif
 // Get sums for y calibration
     z = zx = zy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         z += (float)cal->yfb[j];
-        zx += (float)(cal->yfb[j]*cal->x[j]);
-        zy += (float)(cal->yfb[j]*cal->y[j]);
+        zx += (float)(cal->yfb[j] * cal->x[j]);
+        zy += (float)(cal->yfb[j] * cal->y[j]);
     }
 
 // Now multiply out to get the calibration for framebuffer y coord
-    cal->a[3] = (int)((a*z + b*zx + c*zy)*(scaling));
-    cal->a[4] = (int)((b*z + e*zx + f*zy)*(scaling));
-    cal->a[5] = (int)((c*z + f*zx + i*zy)*(scaling));
+    cal->a[3] = (int)((a * z + b * zx + c * zy) * (scaling));
+    cal->a[4] = (int)((b * z + e * zx + f * zy) * (scaling));
+    cal->a[5] = (int)((c * z + f * zx + i * zy) * (scaling));
 #if 1  // closed
 //  nn = (int) (a*z + b*zx + c*zy);
 //  nx = (int) (b*z + e*zx + f*zy);
 //  ny = (int) (c*z + f*zx + i*zy);
-    nn = (int)((a*z + b*zx + c*zy)*(scaling));
-    nx = (int)((b*z + e*zx + f*zy)*(scaling));
-    ny = (int)((c*z + f*zx + i*zy)*(scaling));
-    sysprintf("%d %d %d\n",nn,nx,ny);
+    nn = (int)((a * z + b * zx + c * zy) * (scaling));
+    nx = (int)((b * z + e * zx + f * zy) * (scaling));
+    ny = (int)((c * z + f * zx + i * zy) * (scaling));
+    sysprintf("%d %d %d\n", nn, nx, ny);
 #endif
 // If we got here, we're OK, so assign scaling to a[6] and return
     cal->a[6] = (int)scaling;
@@ -149,66 +149,66 @@ int perform_calibration(calibration *cal)
 
 // Get sums for matrix
     n = x = y = x2 = y2 = xy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         n += 1.0;
         x += (float)cal->x[j];
         y += (float)cal->y[j];
-        x2 += (float)(cal->x[j]*cal->x[j]);
-        y2 += (float)(cal->y[j]*cal->y[j]);
-        xy += (float)(cal->x[j]*cal->y[j]);
+        x2 += (float)(cal->x[j] * cal->x[j]);
+        y2 += (float)(cal->y[j] * cal->y[j]);
+        xy += (float)(cal->x[j] * cal->y[j]);
     }
 // Get determinant of matrix -- check if determinant is too small
-    det = n*(x2*y2 - xy*xy) + x*(xy*y - x*y2) + y*(x*xy - y*x2);
-    if(det < 0.1 && det > -0.1)
+    det = n * (x2 * y2 - xy * xy) + x * (xy * y - x * y2) + y * (x * xy - y * x2);
+    if (det < 0.1 && det > -0.1)
     {
-        sysprintf("ts_calibrate: determinant is too small -- %f\n",det);
+        sysprintf("ts_calibrate: determinant is too small -- %f\n", det);
         return 0;
     }
 
 // Get elements of inverse matrix
-    a = (x2*y2 - xy*xy)/det;
-    b = (xy*y - x*y2)/det;
-    c = (x*xy - y*x2)/det;
-    e = (n*y2 - y*y)/det;
-    f = (x*y - n*xy)/det;
-    i = (n*x2 - x*x)/det;
+    a = (x2 * y2 - xy * xy) / det;
+    b = (xy * y - x * y2) / det;
+    c = (x * xy - y * x2) / det;
+    e = (n * y2 - y * y) / det;
+    f = (x * y - n * xy) / det;
+    i = (n * x2 - x * x) / det;
 
 // Get sums for x calibration
     z = zx = zy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         z += (float)cal->xfb[j];
-        zx += (float)(cal->xfb[j]*cal->x[j]);
-        zy += (float)(cal->xfb[j]*cal->y[j]);
+        zx += (float)(cal->xfb[j] * cal->x[j]);
+        zy += (float)(cal->xfb[j] * cal->y[j]);
     }
 
 // Now multiply out to get the calibration for framebuffer x coord
-    cal->a[0] = (int)((a*z + b*zx + c*zy)*(scaling));
-    cal->a[1] = (int)((b*z + e*zx + f*zy)*(scaling));
-    cal->a[2] = (int)((c*z + f*zx + i*zy)*(scaling));
+    cal->a[0] = (int)((a * z + b * zx + c * zy) * (scaling));
+    cal->a[1] = (int)((b * z + e * zx + f * zy) * (scaling));
+    cal->a[2] = (int)((c * z + f * zx + i * zy) * (scaling));
 #if 0 //close
-    sysprintf("%f %f %f\n",(a*z + b*zx + c*zy),
-              (b*z + e*zx + f*zy),
-              (c*z + f*zx + i*zy));
+    sysprintf("%f %f %f\n", (a * z + b * zx + c * zy),
+              (b * z + e * zx + f * zy),
+              (c * z + f * zx + i * zy));
 #endif
 // Get sums for y calibration
     z = zx = zy = 0;
-    for(j=0; j<5; j++)
+    for (j = 0; j < 5; j++)
     {
         z += (float)cal->yfb[j];
-        zx += (float)(cal->yfb[j]*cal->x[j]);
-        zy += (float)(cal->yfb[j]*cal->y[j]);
+        zx += (float)(cal->yfb[j] * cal->x[j]);
+        zy += (float)(cal->yfb[j] * cal->y[j]);
     }
 
 // Now multiply out to get the calibration for framebuffer y coord
-    cal->a[3] = (int)((a*z + b*zx + c*zy)*(scaling));
-    cal->a[4] = (int)((b*z + e*zx + f*zy)*(scaling));
-    cal->a[5] = (int)((c*z + f*zx + i*zy)*(scaling));
+    cal->a[3] = (int)((a * z + b * zx + c * zy) * (scaling));
+    cal->a[4] = (int)((b * z + e * zx + f * zy) * (scaling));
+    cal->a[5] = (int)((c * z + f * zx + i * zy) * (scaling));
 #if 0  // closed
-    sysprintf("%f %f %f\n",(a*z + b*zx + c*zy),
-              (b*z + e*zx + f*zy),
-              (c*z + f*zx + i*zy));
+    sysprintf("%f %f %f\n", (a * z + b * zx + c * zy),
+              (b * z + e * zx + f * zy),
+              (c * z + f * zx + i * zy));
 #endif
 // If we got here, we're OK, so assign scaling to a[6] and return
     cal->a[6] = (int)scaling;
@@ -216,7 +216,7 @@ int perform_calibration(calibration *cal)
 }
 
 
-static void get_sample (calibration *cal,int index, int x, int y, char *name)
+static void get_sample(calibration *cal, int index, int x, int y, char *name)
 {
     static int last_x = -1, last_y;
 
@@ -230,10 +230,10 @@ static void get_sample (calibration *cal,int index, int x, int y, char *name)
         last_y <<= 16;
         for (i = 0; i < NR_STEPS; i++)
         {
-            put_cross (last_x >> 16, last_y >> 16, 2 | XORMODE);
+            put_cross(last_x >> 16, last_y >> 16, 2 | XORMODE);
             //usleep (1000);
-						GUI_Delay(1);
-            put_cross (last_x >> 16, last_y >> 16, 2 | XORMODE);
+            GUI_Delay(1);
+            put_cross(last_x >> 16, last_y >> 16, 2 | XORMODE);
             last_x += dx;
             last_y += dy;
         }
@@ -241,9 +241,9 @@ static void get_sample (calibration *cal,int index, int x, int y, char *name)
 
 
     put_cross(x, y, 2 | XORMODE);
-    getxy (&cal->x [index], &cal->y [index]);
+    getxy(&cal->x [index], &cal->y [index]);
     put_cross(x, y, 2 | XORMODE);
-		GUI_Delay(1);
+    GUI_Delay(1);
 
     last_x = cal->xfb [index] = x;
     last_y = cal->yfb [index] = y;
@@ -259,7 +259,7 @@ int ts_calibrate(int xsize, int ysize)
     yres = ysize;
 
     for (i = 0; i < NR_COLORS; i++)
-        setcolor (i, palette [i]);
+        setcolor(i, palette [i]);
 
 //    put_string_center (xres / 2, yres / 4,
 //                       "TSLIB calibration utility", 1);
@@ -270,7 +270,7 @@ int ts_calibrate(int xsize, int ysize)
     GUI_DispStringHCenterAt("TSLIB calibration utility", xres / 2, yres / 4);
 
     //GUI_SetColor(0xffffffff);
-		GUI_SetColor(0xff808080);
+    GUI_SetColor(0xff808080);
     GUI_DispStringHCenterAt("Touch crosshair to calibrate", xres / 2, yres / 4 + 20);
 
     GUI_DispStringHCenterAt("Touch crosshair to calibrate", xres / 2, yres / 4 + 20);
@@ -280,19 +280,19 @@ int ts_calibrate(int xsize, int ysize)
 // Read a touchscreen event to clear the buffer
     //getxy(ts, 0, 0);
 
-    get_sample (&cal, 0, 50,        50,        "Top left");
+    get_sample(&cal, 0, 50,        50,        "Top left");
     GUI_X_Delay(300);
-    get_sample (&cal, 1, xres - 50, 50,        "Top right");
+    get_sample(&cal, 1, xres - 50, 50,        "Top right");
     GUI_X_Delay(300);
-    get_sample (&cal, 2, xres - 50, yres - 50, "Bot right");
+    get_sample(&cal, 2, xres - 50, yres - 50, "Bot right");
     GUI_X_Delay(300);
-    get_sample (&cal, 3, 50,        yres - 50, "Bot left");
+    get_sample(&cal, 3, 50,        yres - 50, "Bot left");
     GUI_X_Delay(300);
-    get_sample (&cal, 4, xres / 2,  yres / 2,  "Center");
+    get_sample(&cal, 4, xres / 2,  yres / 2,  "Center");
     GUI_X_Delay(300);
-    if (perform_calibration (&cal))
+    if (perform_calibration(&cal))
     {
-        sysprintf ("Calibration constants: ");
+        sysprintf("Calibration constants: ");
         for (i = 0; i < 7; i++) sysprintf("%d ", cal.a [i]);
         sysprintf("\n");
     }
@@ -313,20 +313,20 @@ int ts_calibrate(int xsize, int ysize)
 
 int linear_read(int *sumx, int *sumy)
 {
-    int xtemp,ytemp;
+    int xtemp, ytemp;
 
 //  ret = dejitter_read(info->next, samp, nr);
-    if ( Read_TouchPanel(sumx, sumy) > 0)
+    if (Read_TouchPanel(sumx, sumy) > 0)
     {
 //sysprintf("Before X=%d, Y=%d\n",*sumx, *sumy);
         xtemp = *sumx;
         ytemp = *sumy;
-        *sumx = ( final_cal.a[2] +
-                  final_cal.a[0]*xtemp +
-                  final_cal.a[1]*ytemp ) / final_cal.a[6];
-        *sumy = ( final_cal.a[5] +
-                  final_cal.a[3]*xtemp +
-                  final_cal.a[4]*ytemp ) / final_cal.a[6];
+        *sumx = (final_cal.a[2] +
+                 final_cal.a[0] * xtemp +
+                 final_cal.a[1] * ytemp) / final_cal.a[6];
+        *sumy = (final_cal.a[5] +
+                 final_cal.a[3] * xtemp +
+                 final_cal.a[4] * ytemp) / final_cal.a[6];
 //sysprintf("After X=%d, Y=%d\n",*sumx, *sumy);
         return 1;
     }
@@ -340,16 +340,16 @@ int linear_read(int *sumx, int *sumy)
 
 int ts_phy2log(int *sumx, int *sumy)
 {
-    int xtemp,ytemp;
+    int xtemp, ytemp;
 
     xtemp = *sumx;
     ytemp = *sumy;
-    *sumx = ( final_cal.a[2] +
-              final_cal.a[0]*xtemp +
-              final_cal.a[1]*ytemp ) / final_cal.a[6];
-    *sumy = ( final_cal.a[5] +
-              final_cal.a[3]*xtemp +
-              final_cal.a[4]*ytemp ) / final_cal.a[6];
+    *sumx = (final_cal.a[2] +
+             final_cal.a[0] * xtemp +
+             final_cal.a[1] * ytemp) / final_cal.a[6];
+    *sumy = (final_cal.a[5] +
+             final_cal.a[3] * xtemp +
+             final_cal.a[4] * ytemp) / final_cal.a[6];
 //sysprintf("After X=%d, Y=%d\n",*sumx, *sumy);
     return 1;
 }
