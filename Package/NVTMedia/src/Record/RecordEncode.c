@@ -169,7 +169,7 @@ static void * VideoEnocdeWorkerThread( void * pvArgs )
 	S_VIDEO_ENC_PRIV *psVideoEncPriv = (S_VIDEO_ENC_PRIV *)psVideoEncodeRes->pvVideoEncPriv;
 	void *pvVideoList;
 	uint64_t u64CurrentTime;
-	uint64_t u64FillTime;
+	uint64_t u64FillTime = 0;
 	uint64_t u64VideoInPeriod;
 	S_NM_VIDEO_CTX *psVideoMediaCtx = NULL;
 	S_NM_VIDEO_CTX *psVideoFillCtx = NULL;
@@ -184,7 +184,8 @@ static void * VideoEnocdeWorkerThread( void * pvArgs )
 	psVideoMediaCtx = &psVideoEncodeRes->sMediaVideoCtx;
 	psVideoFillCtx = &psVideoEncodeRes->sFillVideoCtx;
 
-	u64VideoInPeriod = ((1000 / psVideoMediaCtx->u32FrameRate) * 90) / 100;
+//	u64VideoInPeriod = ((1000 / psVideoMediaCtx->u32FrameRate) * 90) / 100;
+	u64VideoInPeriod = ((1000 / psVideoMediaCtx->u32FrameRate) * 50) / 100;
 	if(u64VideoInPeriod == 0){
 		u64VideoInPeriod = 10;
 	}
@@ -197,6 +198,10 @@ static void * VideoEnocdeWorkerThread( void * pvArgs )
 		if(psVideoEncPriv->eEncThreadState == eENCODE_THREAD_STATE_IDLE){
 			usleep(1000);
 			continue;
+		}
+
+		if(u64FillTime == 0){
+			u64FillTime = u64CurrentTime + u64VideoInPeriod;
 		}
 		
 		//fetch video in 

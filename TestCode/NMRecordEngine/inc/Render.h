@@ -33,13 +33,15 @@
 
 
 int
-Render_Init(
-	uint32_t u32AudioSampleRate,
-	uint32_t u32AudioChannel
-);
+Render_Init(void);
 
 
 void
 Render_Final(void);
+
+void
+Render_SetFrameBuffAddr(
+	uint8_t *pu8FBAddr
+);
 
 #endif

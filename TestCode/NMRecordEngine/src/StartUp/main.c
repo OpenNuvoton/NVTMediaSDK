@@ -31,8 +31,6 @@
 
 #include "MainTask.h"
 
-#define mainMAIN_TASK_PRIORITY		( tskIDLE_PRIORITY + 3 )
-
 static void SetupHardware(void)
 {
 	/* Perform the hardware setup required.  This is minimal as most of the
@@ -59,22 +57,9 @@ static void SetupHardware(void)
 int main(void)
 {
 	
-	//For heap usage checking code
-#if 0
-	uint32_t u32MemAddr = 0x5E0000;
-
-	u32MemAddr += 0x10000;
-	u32MemAddr &= 0xFFFF0000;
-	
-	while(u32MemAddr < 0x800000){
-		memset((void *)u32MemAddr, 0xEE, 1024);
-		u32MemAddr += 0x10000;
-	}
-#endif
-	
 	SetupHardware();
 
-	xTaskCreate( MainTask, "Main", configMINIMAL_STACK_SIZE, NULL, mainMAIN_TASK_PRIORITY, NULL );
+	xTaskCreate( MainTask, "Main", 2048, NULL, mainMAIN_TASK_PRIORITY, NULL );
 	
 	/* Now all the tasks have been started - start the scheduler.
 
@@ -119,7 +104,7 @@ static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE]; // __attribute__ (
     *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
 }
 
-void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint16_t *pusTimerTaskStackSize )
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pusTimerTaskStackSize )
 {
 /* The buffers used by the Timer/Daemon task must be static so they are
 persistent, and so exist after this function returns. */

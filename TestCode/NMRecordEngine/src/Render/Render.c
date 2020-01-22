@@ -21,64 +21,75 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *****************************************************************************/
-#ifndef __VIDEO_IN_H__
-#define __VIDEO_IN_H__
 
-#define DEF_VIN_MAX_PIPES			4
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
 
-typedef enum {
-	eVIN_COLOR_NONE,
-	eVIN_COLOR_YUV422,
-	eVIN_COLOR_YUV422P,
-	eVIN_COLOR_YUV420P_MB,
-	eVIN_COLOR_YUV420P,
-} E_VIN_COLOR_TYPE;
+#include "Render.h"
 
-typedef struct {
-	uint32_t u32Width;
-	uint32_t u32Height;
-	E_VIN_COLOR_TYPE eColorType;
-	uint32_t u32FramePhyAddr;
-	uint32_t u32PipeNo;
-	uint32_t u32FrameBufSize;
-	uint32_t u32FrameRate;
-}S_VIN_PIPE_INFO;
+#include "N9H26_VPOST.h"
+#include "VideoIn.h"
 
+#define VPOST_FRAMEBUFFER_SIZE		(LCD_PANEL_WIDTH  *LCD_PANEL_HEIGHT * 2)
 
-typedef struct {
-	S_VIN_PIPE_INFO sPipeInfo;
-}S_VIN_FRAME_DATA;
+static uint8_t s_au8BlankFrameBuffer[VPOST_FRAMEBUFFER_SIZE];
+static uint8_t *s_pu8CurFBAddr;
 
-typedef struct {
-	S_VIN_PIPE_INFO asVinPipeInfo[DEF_VIN_MAX_PIPES];
-	uint32_t u32NumPipes;
-}S_VIN_CONFIG;
+extern void vpostSetFrameBuffer(UINT32 pFramebuf);
 
-int32_t 
-VideoIn_DeviceInit(void);
-
-void VideoIn_TaskCreate(
-	void *pvParameters
-);
-
-BOOL
-VideoIn_ReadNextPlanarFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
-	uint64_t *pu64FrameTime
-);
-
-BOOL
-VideoIn_ReadNextPacketFrame(
-	uint32_t u32PortNo,
-	uint8_t **ppu8FrameData,
-	uint64_t *pu64FrameTime
-);
-
-S_VIN_PIPE_INFO *
-VideoIn_GetPipeInfo(
-	int32_t i32PipeNo
-);
+static void VPOST_InterruptServiceRiuntine()
+{
+	vpostSetFrameBuffer((uint32_t)s_pu8CurFBAddr);
+}
 
 
-#endif
+static void InitVPOST(uint8_t* pu8FrameBuffer)
+{		
+	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
+	LCDFORMATEX lcdFormat;	
+
+	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
+	lcdFormat.nScreenWidth = LCD_PANEL_WIDTH;
+	lcdFormat.nScreenHeight = LCD_PANEL_HEIGHT;	  
+	vpostLCMInit(&lcdFormat, (UINT32*)pu8FrameBuffer);
+	
+	vpostInstallCallBack(eDRVVPOST_VINT, (PFN_DRVVPOST_INT_CALLBACK)VPOST_InterruptServiceRiuntine,  (PFN_DRVVPOST_INT_CALLBACK*)&fun_ptr);
+	vpostEnableInt(eDRVVPOST_VINT);	
+	sysEnableInterrupt(IRQ_VPOST);	
+}	
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int
+Render_Init(void)
+{
+	
+	//Init VPOST
+	memset(s_au8BlankFrameBuffer, 0x0, VPOST_FRAMEBUFFER_SIZE);
+	s_pu8CurFBAddr = s_au8BlankFrameBuffer;
+	InitVPOST(s_pu8CurFBAddr);
+
+	return 0;
+}
+
+void
+Render_Final(void)
+{
+	s_pu8CurFBAddr = s_au8BlankFrameBuffer;
+	vpostLCMDeinit();
+}
+
+void
+Render_SetFrameBuffAddr(
+	uint8_t *pu8FBAddr
+)
+{
+	s_pu8CurFBAddr = pu8FBAddr;
+}
+
+
+
+

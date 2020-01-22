@@ -38,13 +38,22 @@
 #include "VideoIn.h"
 #include "SensorIf.h"
 
-#include "NVTMedia_Log.h"
+#include "NVTMedia.h"
 
 #if VIN_CONFIG_PORT0_PLANAR_MAX_FRAME_BUF == 1
 #define __VIN_ONE_SHOT_MODE__
 #endif
 
+#if VIN_CONFIG_PORT0_PLANAR_FRAME_BUF < 3
+	#error "Planar frame must >= 3"
+#endif
+
+#if VIN_CONFIG_PORT0_PACKET_FRAME_BUF < 3
+	#error "Packet frame must >= 3"
+#endif
+
 #define DEF_VIN_MAX_PORTS	2
+//#define VIDEOIN_TASK_STATE
 
 struct S_VIN_CTRL;
 
@@ -56,8 +65,16 @@ typedef struct {
 	uint32_t u32PlanarMaxFrameBuf;	
 	BOOL	*pabIsPacketBufFull;
 	BOOL	*pabIsPlanarBufFull;
+
 	uint32_t u32PacketInIdx;
+//	uint32_t u32PacketPreviewIdx;
+	uint32_t u32PacketProcIdx;
+	uint32_t u32PacketEncIdx;
+
 	uint32_t u32PlanarInIdx;
+	uint32_t u32PlanarProcIdx;
+	uint32_t u32PlanarEncIdx;
+	
 	uint8_t **apu8PlanarFrameBufPtr;
 	uint8_t **apu8PacketFrameBufPtr;
 	S_VIN_PIPE_INFO *psPlanarPipeInfo;
@@ -68,7 +85,11 @@ typedef struct {
 	S_SENSOR_IF *psSnrIf;
 
 	SemaphoreHandle_t tVinISRSem;	//video-in interrupt semaphore
+	xSemaphoreHandle tFrameIndexMutex;
+
+#if defined(VIDEOIN_TASK_STATE)
 	xSemaphoreHandle tVinStateMutex;
+#endif
 
 	BOOL bNightModeSwitch;
 
@@ -595,6 +616,13 @@ OpenVinDev(
 		psPortOP->psPlanarPipeInfo->u32Width = psPortOP->sSnrAttr.u32PlanarWidth;
 		psPortOP->psPlanarPipeInfo->u32Height = psPortOP->sSnrAttr.u32PlanarHeight;
 
+		if (psPortOP->sSnrAttr.ePlanarColorFormat == eVIDEOIN_MACRO_PLANAR_YUV420)
+			psPortOP->psPlanarPipeInfo->eColorType = eVIN_COLOR_YUV420P_MB; 
+		else if(psPortOP->sSnrAttr.ePlanarColorFormat == eVIDEOIN_PLANAR_YUV422)
+			psPortOP->psPlanarPipeInfo->eColorType = eVIN_COLOR_YUV422P; 
+		else if(psPortOP->sSnrAttr.ePlanarColorFormat == eVIDEOIN_PLANAR_YUV420)
+			psPortOP->psPlanarPipeInfo->eColorType = eVIN_COLOR_YUV420P; 
+						
 		psPortOP->psPlanarPipeInfo->u32FramePhyAddr = (uint32_t)psPortOP->sSnrAttr.pu8PlanarFrameBuf;
 		psPortOP->psPlanarPipeInfo->u32FrameBufSize = u32PlanarFrameBufSize;
 		psPortOP->psPlanarPipeInfo->u32FrameRate = psPortOP->sSnrAttr.u32FrameRate;
@@ -611,7 +639,8 @@ OpenVinDev(
 	if(psPortOP->psPacketPipeInfo){
 		psPortOP->psPacketPipeInfo->u32Width = psPortOP->sSnrAttr.u32PacketWidth;
 		psPortOP->psPacketPipeInfo->u32Height = psPortOP->sSnrAttr.u32PacketHeight;
-
+		psPortOP->psPacketPipeInfo->eColorType = eVIN_COLOR_YUV422;		
+		
 		psPortOP->psPacketPipeInfo->u32FramePhyAddr = (uint32_t)psPortOP->sSnrAttr.pu8PacketFrameBuf;	
 		psPortOP->psPacketPipeInfo->u32FrameBufSize = u32PacketFrameBufSize;
 		psPortOP->psPacketPipeInfo->u32FrameRate = psPortOP->sSnrAttr.u32FrameRate;
@@ -661,8 +690,15 @@ VideoInDeviceInit(
 		psPortOP->u32PlanarMaxFrameBuf = VIN_CONFIG_PORT0_PLANAR_FRAME_BUF;
 		psPortOP->pabIsPacketBufFull = s_abIsPacketBufFull;
 		psPortOP->pabIsPlanarBufFull = s_abIsPlanarBufFull;
+
 		psPortOP->u32PacketInIdx = 0;
+		psPortOP->u32PacketProcIdx = 0;
+		psPortOP->u32PacketEncIdx = 0;
+		
 		psPortOP->u32PlanarInIdx = 0;
+		psPortOP->u32PlanarProcIdx = 0;
+		psPortOP->u32PlanarEncIdx = 0;
+
 		psPortOP->apu8PlanarFrameBufPtr = s_apu8PlanarFrameBufPtr;
 		psPortOP->apu8PacketFrameBufPtr = s_apu8PacketFrameBufPtr;
 		
@@ -693,13 +729,21 @@ VideoInDeviceInit(
 			return -1;
 		}
 
+#if defined(VIDEOIN_TASK_STATE)
 		psPortOP->tVinStateMutex = xSemaphoreCreateMutex();
 		
 		if(psPortOP->tVinStateMutex == NULL){
 			NMLOG_ERROR("Unable create video-in state mutex \n");
 			return -2;
 		}
+#endif
 		
+		psPortOP->tFrameIndexMutex = xSemaphoreCreateMutex();
+		if(psPortOP->tFrameIndexMutex == NULL){
+			NMLOG_ERROR("Unable create video-in frame index mutex \n");
+			return -2;
+		}
+				
 		if (OpenVinDev(psPortOP) != 0){
 			NMLOG_ERROR("Open video-in device failed \n");
 			return -3;
@@ -719,8 +763,15 @@ VideoInDeviceInit(
 		psPortOP->u32PlanarMaxFrameBuf = VIN_CONFIG_PORT1_PLANAR_FRAME_BUF;
 		psPortOP->pabIsPacketBufFull = s_abIsPort1PacketBufFull;
 		psPortOP->pabIsPlanarBufFull = s_abIsPort1PlanarBufFull;
+
 		psPortOP->u32PacketInIdx = 0;
+		psPortOP->u32PacketProcIdx = 0;
+		psPortOP->u32PacketEncIdx = 0;
+		
 		psPortOP->u32PlanarInIdx = 0;
+		psPortOP->u32PlanarProcIdx = 0;
+		psPortOP->u32PlanarEncIdx = 0;
+
 		psPortOP->apu8PlanarFrameBufPtr = s_apu8Port1PlanarFrameBufPtr;
 		psPortOP->apu8PacketFrameBufPtr = s_apu8Port1PacketFrameBufPtr;
 
@@ -751,13 +802,21 @@ VideoInDeviceInit(
 			return -1;
 		}
 
+#if defined(VIDEOIN_TASK_STATE)
 		psPortOP->tVinStateMutex = xSemaphoreCreateMutex();
 		
 		if(psPortOP->tVinStateMutex == NULL){
 			NMLOG_ERROR("Unable create video-in state mutex \n");
 			return -2;
 		}
+#endif
 
+		psPortOP->tFrameIndexMutex = xSemaphoreCreateMutex();
+		if(psPortOP->tFrameIndexMutex == NULL){
+			NMLOG_ERROR("Unable create video-in frame index mutex \n");
+			return -2;
+		}
+		
 		if (OpenVinDev(psPortOP) != 0){
 			NMLOG_ERROR("Open video-in device failed \n");
 			return -3;
@@ -773,6 +832,166 @@ VideoInDeviceInit(
 	
 	return 0;
 }
+
+static void VinFrameLoop(
+	S_VIN_PORT_OP	*psPortOP
+)
+{
+	int32_t i32MaxPlanarFrameCnt = psPortOP->u32PlanarMaxFrameBuf;
+	int32_t i32MaxPacketFrameCnt = psPortOP->u32PacketMaxFrameBuf;
+	int32_t i;
+	
+	uint64_t u64CalFPSStartTime;
+	uint64_t u64CurTime;	
+	uint64_t u64CalFPSTime;	
+	uint32_t u32Frames = 0;
+
+	while(1){
+		xSemaphoreTake(psPortOP->tVinISRSem, portMAX_DELAY);
+		xSemaphoreTake(psPortOP->tFrameIndexMutex, portMAX_DELAY);
+
+		for(i = 0; i < i32MaxPlanarFrameCnt; i ++){
+			if(((i + 1) % i32MaxPlanarFrameCnt)  == psPortOP->u32PlanarInIdx){
+				if(psPortOP->pabIsPlanarBufFull[i] == TRUE){
+					psPortOP->u32PlanarProcIdx = i;
+				}
+			}				
+			else if( i == psPortOP->u32PlanarInIdx){
+				//Nothing to do
+			}
+			else if( psPortOP->pabIsPlanarBufFull[i] == TRUE ){
+				if((i != psPortOP->u32PlanarProcIdx) && ( i != psPortOP->u32PlanarEncIdx))
+					psPortOP->pabIsPlanarBufFull[i] = FALSE;
+			}				
+		}
+
+		for(i = 0; i < i32MaxPacketFrameCnt; i ++){
+			if(((i + 1) % i32MaxPacketFrameCnt)  == psPortOP->u32PacketInIdx){
+				if(psPortOP->pabIsPacketBufFull[i] == TRUE){
+					psPortOP->u32PacketProcIdx = i;
+				}
+			}				
+			else if( i == psPortOP->u32PacketInIdx){
+				//Nothing to do
+			}
+			else if(psPortOP->pabIsPacketBufFull[i] == TRUE ){
+				if((i != psPortOP->u32PacketProcIdx) && (i != psPortOP->u32PacketEncIdx))
+					psPortOP->pabIsPacketBufFull[i] = FALSE;
+			}				
+		}
+
+		xSemaphoreGive(psPortOP->tFrameIndexMutex);
+		
+		u64CurTime = NMUtil_GetTimeMilliSec();
+		u64CalFPSTime = u64CurTime - u64CalFPSStartTime;
+		u32Frames ++;
+		
+#if defined (__VIN_ONE_SHOT_MODE__)
+		vTaskDelay(1 / portTICK_RATE_MS);
+		psPortOP->sVinDev.SetOperationMode(TRUE);
+		psPortOP->sVinDev.SetShadowRegister();
+#endif
+
+		if(u64CalFPSTime >= 5000){
+			uint32_t u32NewFPS;
+			
+			u32NewFPS = (u32Frames) / ( u64CalFPSTime / 1000);
+
+			NMLOG_INFO("Video_in port %d, %d fps \n", psPortOP->u32PortNo, u32NewFPS);
+			u32Frames = 0;
+			u64CalFPSStartTime = NMUtil_GetTimeMilliSec();
+		}
+	}
+}
+
+int32_t 
+VideoIn_DeviceInit(void)
+{
+	memset(&s_sVinCtrl, 0, sizeof(S_VIN_CTRL));
+	return VideoInDeviceInit(&s_sVinCtrl);
+}
+
+void VideoIn_TaskCreate(
+	void *pvParameters
+)
+{
+	VinFrameLoop(&s_sVinCtrl.asPortOP[0]);	
+	vTaskDelete(NULL);
+}
+
+BOOL
+VideoIn_ReadNextPlanarFrame(
+	uint32_t u32PortNo,
+	uint8_t **ppu8FrameData,
+	uint64_t *pu64FrameTime
+)
+{
+	S_VIN_PORT_OP	*psPortOP = &s_sVinCtrl.asPortOP[u32PortNo];
+	
+	if(ppu8FrameData == NULL)
+		return FALSE;
+		
+	xSemaphoreTake(psPortOP->tFrameIndexMutex, portMAX_DELAY);
+	
+	if(psPortOP->u32PlanarProcIdx == psPortOP->u32PlanarEncIdx){
+		xSemaphoreGive(psPortOP->tFrameIndexMutex);
+		return FALSE;
+	}
+
+	psPortOP->pabIsPlanarBufFull[psPortOP->u32PlanarEncIdx] = FALSE;
+	
+	psPortOP->u32PlanarEncIdx = psPortOP->u32PlanarProcIdx;
+	*ppu8FrameData = psPortOP->apu8PlanarFrameBufPtr[psPortOP->u32PlanarEncIdx];
+	*pu64FrameTime = NMUtil_GetTimeMilliSec();
+	xSemaphoreGive(psPortOP->tFrameIndexMutex);
+
+	return TRUE;
+}
+
+BOOL
+VideoIn_ReadNextPacketFrame(
+	uint32_t u32PortNo,
+	uint8_t **ppu8FrameData,
+	uint64_t *pu64FrameTime
+)
+{
+	S_VIN_PORT_OP	*psPortOP = &s_sVinCtrl.asPortOP[u32PortNo];
+	
+	if(ppu8FrameData == NULL)
+		return FALSE;
+	
+	if(psPortOP->tFrameIndexMutex == NULL)
+		return FALSE;
+	
+	xSemaphoreTake(psPortOP->tFrameIndexMutex, portMAX_DELAY);	
+
+	if(psPortOP->u32PacketProcIdx == psPortOP->u32PacketEncIdx){
+		xSemaphoreGive(psPortOP->tFrameIndexMutex);
+		return FALSE;
+	}
+
+	psPortOP->pabIsPacketBufFull[psPortOP->u32PacketEncIdx] = FALSE;
+	
+	psPortOP->u32PacketEncIdx = psPortOP->u32PacketProcIdx;
+	*ppu8FrameData = psPortOP->apu8PacketFrameBufPtr[psPortOP->u32PacketEncIdx];
+	*pu64FrameTime = NMUtil_GetTimeMilliSec();
+	xSemaphoreGive(psPortOP->tFrameIndexMutex);
+
+	return TRUE;
+}
+
+S_VIN_PIPE_INFO *
+VideoIn_GetPipeInfo(
+	int32_t i32PipeNo
+)
+{
+	if(i32PipeNo >= DEF_VIN_MAX_PIPES){
+		return NULL;
+	}
+
+	return &s_sVinCtrl.sVinConfig.asVinPipeInfo[i32PipeNo];
+}
+
 
 
 

@@ -33,7 +33,7 @@
 
 // Enable sensor port
 #define VIN_CONFIG_USE_1ST_PORT			1
-#define VIN_CONFIG_USE_2ND_PORT		1
+//#define VIN_CONFIG_USE_2ND_PORT		1
 
 //Sensor selection
 #define VIN_CONFIG_SENSOR_NT99141			1
@@ -74,10 +74,10 @@
 #define VIN_CONFIG_PORT0_PACKET_WIDTH		(320)			//video-in packet pipe maximum width
 #define VIN_CONFIG_PORT0_PACKET_HEIGHT		(240)			//video-in packet pipe maximum height
 
-#define VIN_CONFIG_PORT0_PLANAR_FRAME_BUF			(2)				//video-in planar pipe maximum frame buffers. Don't over 3
-#define VIN_CONFIG_PORT0_PACKET_FRAME_BUF			(2)				//video-in planar pipe maximum frame buffers. Don't over 3
+#define VIN_CONFIG_PORT0_PLANAR_FRAME_BUF			(3)				//video-in planar pipe maximum frame buffers. Must >= 3
+#define VIN_CONFIG_PORT0_PACKET_FRAME_BUF			(3)				//video-in planar pipe maximum frame buffers. Must >= 3
 
-#define VIN_CONFIG_PORT0_FRAME_RATE						(15)
+#define VIN_CONFIG_PORT0_FRAME_RATE						(20)
 
 #define VIN_CONFIG_PORT0_NIGHT_MODE						(1)
 

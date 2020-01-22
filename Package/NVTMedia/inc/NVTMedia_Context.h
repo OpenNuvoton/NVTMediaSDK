@@ -32,6 +32,7 @@ typedef enum{
 	eNM_CTX_VIDEO_H264,
 	eNM_CTX_VIDEO_YUV422,		//Raw data format
 	eNM_CTX_VIDEO_YUV422P,		
+	eNM_CTX_VIDEO_YUV420P_MB,		
 	eNM_CTX_VIDEO_END,		
 }E_NM_CTX_VIDEO_TYPE;
 

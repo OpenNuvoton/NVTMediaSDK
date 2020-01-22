@@ -86,16 +86,16 @@ CheckingCtxParam(
 		else
 			psCtxParam->u32FixGOP = s_sDefaultCtxParam.u32FixGOP;
 	}
-		
-	if(psCtxParam->u32MinQuality >= psCtxParam->u32MaxQuality)
-		return eNM_ERRNO_BAD_PARAM;
-	
+			
 	if((psCtxParam->u32MaxQuality == 0) || (psCtxParam->u32MaxQuality > s_sDefaultCtxParam.u32MaxQuality))
 		psCtxParam->u32MaxQuality = s_sDefaultCtxParam.u32MaxQuality;
 		
 	if((psCtxParam->u32MinQuality == 0) || (psCtxParam->u32MinQuality > s_sDefaultCtxParam.u32MinQuality))
 		psCtxParam->u32MinQuality = s_sDefaultCtxParam.u32MinQuality;
 
+	if(psCtxParam->u32MinQuality >= psCtxParam->u32MaxQuality)
+		return eNM_ERRNO_BAD_PARAM;
+	
 	return eNM_ERRNO_NONE;
 }
 
