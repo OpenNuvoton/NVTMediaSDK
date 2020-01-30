@@ -33,6 +33,8 @@
 #include "Util/NMVideoList.h"
 #include "Util/NMAudioList.h"
 
+#define DEF_REPORT_REC_STATUS_DURATION 1000			//1sec
+
 typedef enum {
 	eMUX_THREAD_STATE_INIT,
 	eMUX_THREAD_STATE_IDLE,
@@ -65,6 +67,7 @@ typedef struct {
 	uint32_t u32CurVideoChunks;
 	uint32_t u32CurAudioChunks;
 
+	uint64_t u64TotalChunkSize;
 } S_MUX_PRIV;
 
 static int
@@ -154,6 +157,7 @@ static void FillRecordInfo(
 		psRecordInfo->u32Duration = (uint32_t)(NMUtil_GetTimeMilliSec() - psMuxPriv->u64CurStartRecTime);
 	psRecordInfo->u32VideoChunks = psMuxPriv->u32CurVideoChunks;
 	psRecordInfo->u32AudioChunks = psMuxPriv->u32CurAudioChunks;
+	psRecordInfo->u64TotalChunkSize = psMuxPriv->u64TotalChunkSize;
 }
 
 static void SupplementZeroVideoFrame(
@@ -266,10 +270,12 @@ static void * MuxWorkerThread( void * pvArgs )
 	S_MUX_MEDIA_ATTR *psNextMediaAttr = &psMuxPriv->sNextMedia;
 	S_NM_VIDEO_CTX *psVideoCtx = &psMuxRes->sMediaVideoCtx;
 	S_NM_AUDIO_CTX *psAudioCtx = &psMuxRes->sMediaAudioCtx;
+	uint64_t u64ReportStatusTime = 0;
 	
 	psMuxPriv->eMuxThreadState = eMUX_THREAD_STATE_IDLE;
 
 	psMuxPriv->u64CurStartRecTime = 0xFFFFFFFFFFFFFFFF;
+	psMuxPriv->u64TotalChunkSize = 0;
 	
 	while(psMuxPriv->eMuxThreadState != eMUX_THREAD_STATE_TO_EXIT){
 		RunMuxCmd(psMuxRes);
@@ -287,6 +293,7 @@ static void * MuxWorkerThread( void * pvArgs )
 				psMuxRes->pfnStatusCB(eNM_RECORD_STATUS_RECORDING, &sRecordInfo, psCurMediaAttr->pvStatusCBPriv);
 
 			psMuxPriv->eMuxThreadState = eMUX_THREAD_STATE_RECORDING;
+			u64ReportStatusTime = NMUtil_GetTimeMilliSec() + DEF_REPORT_REC_STATUS_DURATION;
 		}
 
 		psVideoPacket = NULL;
@@ -415,19 +422,23 @@ static void * MuxWorkerThread( void * pvArgs )
 
 			psCurMediaAttr->psMediaWriteIF->pfnWriteVideoChunk(psMuxPriv->u32CurVideoChunks, psVideoCtx, psCurMediaAttr->pvMediaRes);
 			psMuxPriv->u32CurVideoChunks ++;
+			psMuxPriv->u64TotalChunkSize += psVideoCtx->u32DataSize;
 			
 			if(psAudioPacket){
 				psCurMediaAttr->psMediaWriteIF->pfnWriteAudioChunk(psMuxPriv->u32CurAudioChunks, psAudioCtx, psCurMediaAttr->pvMediaRes);
 				psMuxPriv->u32CurAudioChunks ++;
+				psMuxPriv->u64TotalChunkSize += psAudioCtx->u32DataSize;
 			}
 		}
 		else{
 			psCurMediaAttr->psMediaWriteIF->pfnWriteAudioChunk(psMuxPriv->u32CurAudioChunks, psAudioCtx, psCurMediaAttr->pvMediaRes);
 			psMuxPriv->u32CurAudioChunks ++;
+			psMuxPriv->u64TotalChunkSize += psAudioCtx->u32DataSize;
 
 			if(psVideoPacket){
 				psCurMediaAttr->psMediaWriteIF->pfnWriteVideoChunk(psMuxPriv->u32CurVideoChunks, psVideoCtx, psCurMediaAttr->pvMediaRes);
 				psMuxPriv->u32CurVideoChunks ++;
+				psMuxPriv->u64TotalChunkSize += psVideoCtx->u32DataSize;
 			}
 		}
 		
@@ -441,6 +452,17 @@ static void * MuxWorkerThread( void * pvArgs )
 			psAudioPacket = NULL;
 		}
 		
+		if(NMUtil_GetTimeMilliSec() > u64ReportStatusTime){
+			//Send status notify
+			if(psMuxRes->pfnStatusCB){
+				FillRecordInfo(&sRecordInfo, psMuxRes, psMuxPriv);
+
+				if(psMuxRes->pfnStatusCB)
+					psMuxRes->pfnStatusCB(eNM_RECORD_STATUS_RECORDING, &sRecordInfo, psCurMediaAttr->pvStatusCBPriv);
+			}
+			u64ReportStatusTime = NMUtil_GetTimeMilliSec() + DEF_REPORT_REC_STATUS_DURATION;
+		}
+
 		usleep(1000);
 	}
 

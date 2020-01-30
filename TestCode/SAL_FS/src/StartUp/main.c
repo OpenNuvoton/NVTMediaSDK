@@ -121,7 +121,7 @@ static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE]; // __attribute__ (
     *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
 }
 
-void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint16_t *pusTimerTaskStackSize )
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pusTimerTaskStackSize )
 {
 /* The buffers used by the Timer/Daemon task must be static so they are
 persistent, and so exist after this function returns. */

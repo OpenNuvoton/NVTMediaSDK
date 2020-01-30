@@ -410,6 +410,11 @@
               <FileType>1</FileType>
               <FilePath>..\src\Media\MP4\MP4Reader.c</FilePath>
             </File>
+            <File>
+              <FileName>MP4Writer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Media\MP4\MP4Writer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -469,6 +474,11 @@
               <FileName>H264Ratecontrol.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\Codec\H264Ratecontrol.c</FilePath>
+            </File>
+            <File>
+              <FileName>AACEncoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Codec\AACEncoder.c</FilePath>
             </File>
           </Files>
         </Group>

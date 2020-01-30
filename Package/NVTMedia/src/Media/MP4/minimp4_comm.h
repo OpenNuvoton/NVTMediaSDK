@@ -204,7 +204,8 @@ enum
     BOX_traf    = FOUR_CHAR_INT( 't', 'r', 'a', 'f' ),//TrackFragmentAtomType
     BOX_tfhd    = FOUR_CHAR_INT( 't', 'f', 'h', 'd' ),//TrackFragmentHeaderAtomType
     BOX_trun    = FOUR_CHAR_INT( 't', 'r', 'u', 'n' ),//TrackFragmentRunAtomType
-
+    BOX_mehd    = FOUR_CHAR_INT( 'm', 'e', 'h', 'd' ),//MovieExtendsHeaderBox
+		
     // Object Descriptors (OD) data coding
     // These takes only 1 byte; this implementation translate <od_tag> to
     // <od_tag> + OD_BASE to keep API uniform and safe for string functions
@@ -362,6 +363,7 @@ enum
 #define    BOX_traf    FOUR_CHAR_INT( 't', 'r', 'a', 'f' )//TrackFragmentAtomType
 #define    BOX_tfhd    FOUR_CHAR_INT( 't', 'f', 'h', 'd' )//TrackFragmentHeaderAtomType
 #define    BOX_trun    FOUR_CHAR_INT( 't', 'r', 'u', 'n' )//TrackFragmentRunAtomType
+#define    BOX_mehd   FOUR_CHAR_INT( 'm', 'e', 'h', 'd' )//MovieExtendsHeaderBox
 
     // Object Descriptors (OD) data coding
     // These takes only 1 byte; this implementation translate <od_tag> to
@@ -427,5 +429,11 @@ enum
 
 
 #endif
+
+#define HEVC_NAL_VPS 32
+#define HEVC_NAL_SPS 33
+#define HEVC_NAL_PPS 34
+#define HEVC_NAL_BLA_W_LP 16
+#define HEVC_NAL_CRA_NUT  21
 
 #endif

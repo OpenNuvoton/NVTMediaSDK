@@ -68,6 +68,9 @@ typedef struct{
 // ==================================================
 // Function declaration
 // ==================================================
+E_AACENC_ERROR
+AACEnc_CodecBuffer(int *i32Buffer
+);
 
 E_AACENC_ERROR
 AACEnc_Initialize(

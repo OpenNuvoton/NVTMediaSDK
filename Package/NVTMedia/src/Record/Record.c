@@ -50,7 +50,7 @@ static S_NM_CODECENC_AUDIO_IF *s_apsAudioEncCodecList[eNM_CTX_AUDIO_END] = {
 	NULL,
 	&g_sG711EncIF,
 	&g_sG711EncIF,
-	NULL,
+	&g_sAACEncIF,
 	NULL,
 	NULL,
 	NULL,
@@ -65,9 +65,11 @@ typedef enum{
 	eNM_CTX_VIDEO_H264,
 	eNM_CTX_VIDEO_YUV422,		//Raw data format
 	eNM_CTX_VIDEO_YUV422P,		
+	eNM_CTX_VIDEO_YUV420P_MB,		
 	eNM_CTX_VIDEO_END,		
 }E_NM_CTX_VIDEO_TYPE;
 */
+
 
 static S_NM_CODECENC_VIDEO_IF *s_apsVideoEncCodecList[eNM_CTX_VIDEO_END] = {
 	NULL,
@@ -123,6 +125,18 @@ OpenAVIWriteMedia(
 		psRecordCtx->sMediaVideoCtx.pvParamSet = pvVideoCtxParam;		
 	}		
 	
+	if(eAudioType == eNM_CTX_AUDIO_AAC){
+		pvAudioCtxParam = calloc(1, sizeof(S_NM_AAC_CTX_PARAM));
+		
+		if(pvAudioCtxParam == NULL){
+			eRet = eNM_ERRNO_MALLOC;
+			goto OpenAVIWriteMedia_fail;
+		}
+
+		psRecordCtx->sMediaAudioCtx.pvParamSet = pvAudioCtxParam;		
+	}		
+
+
 	if((psRecordIF->psVideoCodecIF) && (psRecordIF->psVideoCodecIF->pfnCodecAttrGet))
 		psRecordIF->psVideoCodecIF->pfnCodecAttrGet(&psRecordCtx->sFillVideoCtx, &psRecordCtx->sMediaVideoCtx);
 
@@ -160,6 +174,84 @@ OpenAVIWriteMedia_fail:
 	return eRet;
 }
 
+static E_NM_ERRNO
+OpenMP4WriteMedia(
+	S_NM_MP4_MEDIA_ATTR *psMP4Attr,
+	S_NM_RECORD_IF *psRecordIF,
+	S_NM_RECORD_CONTEXT *psRecordCtx,
+	S_NM_RECORD_OEPN_RES *psOpenRes
+)
+{
+	E_NM_ERRNO eRet = eNM_ERRNO_NONE;
+	void *pvVideoCtxParam = NULL;
+	void *pvAudioCtxParam = NULL;
+	E_NM_CTX_AUDIO_TYPE eAudioType = psRecordCtx->sMediaAudioCtx.eAudioType;
+	E_NM_CTX_VIDEO_TYPE eVideoType = psRecordCtx->sMediaVideoCtx.eVideoType;
+	
+	if(eVideoType > eNM_CTX_VIDEO_NONE)
+		psRecordIF->psVideoCodecIF = s_apsVideoEncCodecList[eVideoType];
+	if(eAudioType > eNM_CTX_AUDIO_NONE)
+		psRecordIF->psAudioCodecIF = s_apsAudioEncCodecList[eAudioType];
+
+	if(eVideoType == eNM_CTX_VIDEO_H264){
+		pvVideoCtxParam = calloc(1, sizeof(S_NM_H264_CTX_PARAM));
+		
+		if(pvVideoCtxParam == NULL){
+			eRet = eNM_ERRNO_MALLOC;
+			goto OpenMP4WriteMedia_fail;
+		}
+
+		psRecordCtx->sMediaVideoCtx.pvParamSet = pvVideoCtxParam;		
+	}		
+
+	if(eAudioType == eNM_CTX_AUDIO_AAC){
+		pvAudioCtxParam = calloc(1, sizeof(S_NM_AAC_CTX_PARAM));
+		
+		if(pvAudioCtxParam == NULL){
+			eRet = eNM_ERRNO_MALLOC;
+			goto OpenMP4WriteMedia_fail;
+		}
+
+		psRecordCtx->sMediaAudioCtx.pvParamSet = pvAudioCtxParam;		
+	}		
+		
+	if((psRecordIF->psVideoCodecIF) && (psRecordIF->psVideoCodecIF->pfnCodecAttrGet))
+		psRecordIF->psVideoCodecIF->pfnCodecAttrGet(&psRecordCtx->sFillVideoCtx, &psRecordCtx->sMediaVideoCtx);
+
+	if((psRecordIF->psAudioCodecIF) && (psRecordIF->psAudioCodecIF->pfnCodecAttrGet))
+		psRecordIF->psAudioCodecIF->pfnCodecAttrGet(&psRecordCtx->sFillAudioCtx, &psRecordCtx->sMediaAudioCtx);
+	
+	eRet = g_sMP4WriterIF.pfnOpenMedia(&psRecordCtx->sMediaVideoCtx, &psRecordCtx->sMediaAudioCtx, psMP4Attr, &psRecordIF->pvMediaRes);
+
+	if(eRet != eNM_ERRNO_NONE)
+		return eRet;
+	
+	psRecordIF->psMediaIF = &g_sMP4WriterIF;	
+	
+	if(psOpenRes){
+		psOpenRes->eMediaFormat = eNM_MEDIA_FORMAT_FILE;
+		psOpenRes->i32MediaHandle = psMP4Attr->i32FD;		
+		psOpenRes->psMediaIF = psRecordIF->psMediaIF; 
+		psOpenRes->pvMediaRes = psRecordIF->pvMediaRes; 
+		psOpenRes->eVideoType = eVideoType;
+		psOpenRes->eAudioType = eAudioType;
+		psOpenRes->pvVideoCtxParam = pvVideoCtxParam;
+		psOpenRes->pvAudioCtxParam = pvAudioCtxParam;		
+	}
+
+	return eNM_ERRNO_NONE;
+	
+	
+OpenMP4WriteMedia_fail:
+	
+	if(pvVideoCtxParam)
+		free(pvVideoCtxParam);
+
+	if(pvAudioCtxParam)
+		free(pvAudioCtxParam);
+	
+	return eRet;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -238,6 +330,18 @@ NMRecord_Open(
 			goto NMRecord_Open_fail;
 
 	}
+
+	if(eMediaType == eNM_MEDIA_MP4){
+		S_NM_MP4_MEDIA_ATTR sMP4Attr;
+		
+		memset(&sMP4Attr, 0 , sizeof(S_NM_MP4_MEDIA_ATTR));
+		sMP4Attr.i32FD = hFile;
+		eNMRet = OpenMP4WriteMedia(&sMP4Attr, psRecordIF, psRecordCtx, psOpenRes);
+
+		if(eNMRet != eNM_ERRNO_NONE)
+			goto NMRecord_Open_fail;
+	}
+
 	
 	*ppvNMOpenRes = psOpenRes;
 	

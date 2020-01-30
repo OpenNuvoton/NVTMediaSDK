@@ -68,7 +68,7 @@ typedef struct{
 	int32_t i32FD;
 	uint32_t u32MediaSize;		//for MP4 reader
 
-	//output for MP4 reader //input for MP4 writer
+	//output for MP4 reader
 	uint64_t u64Duration;	// milli second
 
 	//output for MP4 reader

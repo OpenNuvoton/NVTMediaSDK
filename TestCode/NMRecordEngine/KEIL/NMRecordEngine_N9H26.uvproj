@@ -480,6 +480,16 @@
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
             </File>
+            <File>
+              <FileName>N9H26_AACEncoder.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACEncoder.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_AAC.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_AAC.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

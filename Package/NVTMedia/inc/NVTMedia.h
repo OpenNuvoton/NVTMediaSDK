@@ -77,7 +77,8 @@ typedef enum{
 	eNM_ERRNO_NULL_RES,	
 	eNM_ERRNO_CTX,
 	eNM_ERRNO_OS,
-	eNM_ERRNO_BAD_PARAM,	
+	eNM_ERRNO_BAD_PARAM,
+	eNM_ERRNO_BUSY,	
 }E_NM_ERRNO;
 
 typedef enum{
@@ -320,7 +321,8 @@ typedef struct{
 	E_NM_CTX_AUDIO_TYPE eAudioType;
 	uint32_t   u32Duration;	//milli second
 	uint32_t u32VideoChunks;
-	uint32_t u32AudioChunks;	
+	uint32_t u32AudioChunks;
+	uint64_t u64TotalChunkSize;
 }S_NM_RECORD_INFO;
 
 /**	@brief	Non-blocking callback function to notify recording status

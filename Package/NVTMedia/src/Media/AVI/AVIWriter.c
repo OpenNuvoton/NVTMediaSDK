@@ -30,7 +30,7 @@
 
 #include "AVIUtility.h"
 
-//MP4 media writer resource
+//AVI media writer resource
 typedef struct{
 	S_AVIUTIL_AVIHANDLE sAVIHandle;
 	uint8_t *pu8AVIIdxTableMem;	
