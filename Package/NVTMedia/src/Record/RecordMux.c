@@ -456,9 +456,7 @@ static void * MuxWorkerThread( void * pvArgs )
 			//Send status notify
 			if(psMuxRes->pfnStatusCB){
 				FillRecordInfo(&sRecordInfo, psMuxRes, psMuxPriv);
-
-				if(psMuxRes->pfnStatusCB)
-					psMuxRes->pfnStatusCB(eNM_RECORD_STATUS_RECORDING, &sRecordInfo, psCurMediaAttr->pvStatusCBPriv);
+				psMuxRes->pfnStatusCB(eNM_RECORD_STATUS_RECORDING, &sRecordInfo, psCurMediaAttr->pvStatusCBPriv);
 			}
 			u64ReportStatusTime = NMUtil_GetTimeMilliSec() + DEF_REPORT_REC_STATUS_DURATION;
 		}

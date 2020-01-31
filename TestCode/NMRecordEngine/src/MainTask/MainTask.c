@@ -57,9 +57,14 @@
 #define DEF_RECORD_FILE_MGR_TYPE					eFILEMGR_TYPE_AVI
 #define DEF_RECORD_FILE_FOLDER						"C:\\DCIM"
 #define DEF_REC_RESERVE_STOR_SPACE 				(400000000)
-#define DEF_EACH_REC_FILE_DUARTION 				(60000)
+#define DEF_EACH_REC_FILE_DUARTION 				(60000)					//millisecond
 #define DEF_NM_MEDIA_FILE_TYPE						eNM_MEDIA_AVI
+
+#if (DEF_EACH_REC_FILE_DUARTION == eNM_UNLIMIT_TIME)
+#define DEF_RECORDING_TIME				 				(60000 * 1 + 10000)
+#else
 #define DEF_RECORDING_TIME				 				(DEF_EACH_REC_FILE_DUARTION * 5 + 10000)
+#endif
 
 static char s_szDiskVolume[DEF_DISK_VOLUME_STR_SIZE] = {0x00};
 
@@ -457,8 +462,14 @@ void MainTask( void *pvParameters )
 	}
 	
 	u64StopRecTime = NMUtil_GetTimeMilliSec() + DEF_RECORDING_TIME;
+
+#if (DEF_EACH_REC_FILE_DUARTION == eNM_UNLIMIT_TIME)
+	u64CreateNewMediaTime = eNM_UNLIMIT_TIME;
+	s_bCreateNextMedia = FALSE;	
+#else
 	u64CreateNewMediaTime = NMUtil_GetTimeMilliSec() + (DEF_EACH_REC_FILE_DUARTION / 2);
 	s_bCreateNextMedia = TRUE;
+#endif
 	
 	while(NMUtil_GetTimeMilliSec() < u64StopRecTime){
 		uint8_t *pu8FrameData;

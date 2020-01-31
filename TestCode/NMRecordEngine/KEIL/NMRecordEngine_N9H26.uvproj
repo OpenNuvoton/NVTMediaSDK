@@ -349,7 +349,7 @@
               <MiscControls>--c99</MiscControls>
               <Define>__N9H26__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\..\Package\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC</IncludePath>
+              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\inc;..\..\..\Package\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC;..\..\..\BSP\N9H26_emWin_NonOS\BSP\SampleCode\VideoIn</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

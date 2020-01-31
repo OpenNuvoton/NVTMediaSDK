@@ -173,6 +173,16 @@ AVIWrite_Open(
 		AVIUtility_WriteConfigMemory(&psMediaRes->sAVIHandle, (uint32_t *)pu8AVIIdxTableMem);
 	}
 	else{
+		pu8AVIIdxTableMem = malloc((sizeof(S_AVIFMT_AVIINDEXENTRY) * 4096) + 3);
+
+		if(pu8AVIIdxTableMem == NULL){
+			NMLOG_ERROR("AVI unable allocate AVI index memory \n");
+			eRet = eNM_ERRNO_MALLOC;
+			goto AVIWrite_Open_fail;
+		}
+
+		AVIUtility_WriteConfigMemory(&psMediaRes->sAVIHandle, (uint32_t *)pu8AVIIdxTableMem);
+
 		psMediaRes->szIdxFilePath = NMUtil_strdup(psMediaAttr->szIdxFilePath);
 		if(psMediaRes->szIdxFilePath == NULL){
 			NMLOG_ERROR("AVI unable allocate index file path memory \n");
