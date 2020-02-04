@@ -67,8 +67,11 @@ Render_VideoFlush(
 )
 {
 		uint64_t u64CurTime;
+		char szInfo[100];
+	
 		u64CurTime = NMUtil_GetTimeMilliSec();
-		printf("Render_VideoFlush %d, %d\n", (uint32_t)u64CurTime, (uint32_t)psVideoCtx->u64DataTime);
+		sprintf(szInfo,"Render_VideoFlush %"PRId64", %"PRId64"", u64CurTime, psVideoCtx->u64DataTime );
+		printf("%s \n", szInfo);
 
 		s_pu8CurFBAddr = psVideoCtx->pu8DataBuf;
 }

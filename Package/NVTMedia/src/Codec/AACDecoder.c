@@ -39,6 +39,15 @@ typedef struct {
 
 static pthread_mutex_t *s_ptAACCodecMutex = NULL;
 
+//AAC codec buffer
+#if defined (__GNUC__) && !(__CC_ARM)
+__attribute__ ((aligned (32))) int g_i32InBuf[2048];
+__attribute__ ((aligned (32))) int g_i32OutBuf[2048];
+#else
+__align(32) int g_i32InBuf[2048];
+__align(32) int g_i32OutBuf[2048];
+#endif
+
 // ==================================================
 // External function declaration
 // ==================================================
@@ -99,6 +108,8 @@ AACDec_Open(
 	
 	pthread_mutex_lock(s_ptAACCodecMutex);
 
+	AACDec_CodecBuffer(&g_i32InBuf[0], &g_i32OutBuf[0]);
+	
 	// Initialize libnaacdec
 	if (!AACDec_Initialize2(eAACProfile, psDestCtx->u32SampleRate,
 							psDestCtx->u32Channel, true)) {

@@ -34,7 +34,7 @@ extern "C" {
 #define MINIMP4_MAX_SPS 32
 #define MINIMP4_MAX_PPS 256
 
-#define MINIMP4_TRANSCODE_SPS_ID     1
+#define MINIMP4_TRANSCODE_SPS_ID     0
 
 // Support indexing of MP4 files over 4 GB.
 // If disabled, files with 64-bit offset fields is still supported,
@@ -98,7 +98,7 @@ typedef struct
     int pps_bytes[MINIMP4_MAX_PPS];
 
     int map_sps[MINIMP4_MAX_SPS];
-    int map_pps[MINIMP4_MAX_SPS];
+    int map_pps[MINIMP4_MAX_PPS];
 
 } h264_sps_id_patcher_t;
 

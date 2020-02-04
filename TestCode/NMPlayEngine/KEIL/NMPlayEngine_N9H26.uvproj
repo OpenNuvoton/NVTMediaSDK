@@ -456,11 +456,6 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\ImgProc.lib</FilePath>
             </File>
             <File>
-              <FileName>libAACDecoder.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\libAACDecoder.lib</FilePath>
-            </File>
-            <File>
               <FileName>N9H26_AAC.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_AAC.lib</FilePath>
@@ -471,11 +466,6 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
             </File>
             <File>
-              <FileName>N9H26_VPOST_FW050TFT_800x480.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_VPOST_FW050TFT_800x480.lib</FilePath>
-            </File>
-            <File>
               <FileName>POSIX_FreeRTOS.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
@@ -484,6 +474,16 @@
               <FileName>NVTMedia.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\NVTMedia.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_GIANTPLUS_GPM1006D.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_GIANTPLUS_GPM1006D.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_AACDecoder.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACDecoder.lib</FilePath>
             </File>
           </Files>
         </Group>

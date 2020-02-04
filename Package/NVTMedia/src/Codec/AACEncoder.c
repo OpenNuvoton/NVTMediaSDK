@@ -35,6 +35,7 @@
 // ==================================================
 
 //#define NM_AACENC_MULTIOPEN				// Define it to allow multiple open
+#define DEF_MDCT_BUF_SRAM
 
 enum {
 	eNM_AACENC_DEFAULT_QUALITY	= 90,	// 1 ~ 999
@@ -59,6 +60,16 @@ static pthread_mutex_t *s_ptAACEncCodecMutex = NULL;
 static uint32_t s_u32ReferCnt = 0;
 #endif
 
+#if !defined (DEF_MDCT_BUF_SRAM)
+#if defined (__GNUC__) && !(__CC_ARM)
+static __attribute__ ((aligned (32))) int s_ai32MDCTBuf[2048];
+#else
+static __align(32) int s_ai32MDCTBuf[2048];
+#endif
+#else
+static int *s_ai32MDCTBuf = (int *)0xFF000000; 
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 static E_NM_ERRNO
@@ -80,18 +91,18 @@ AACEnc_Close(
 #endif
 	{
 		AACEnc_Finalize();
-		NMLOG_INFO("libnaacenc finalized");
+		NMLOG_INFO("libnaacenc finalized \n");
 	}
 
 #ifdef NM_AACENC_MULTIOPEN
 	s_u32ReferCnt--;
 
 	if (s_u32ReferCnt > 0){
-		NMLOG_INFO("Done, ReferCnt %u", s_u32ReferCnt);
+		NMLOG_INFO("Done, ReferCnt %u \n", s_u32ReferCnt);
 	}
 	else
 #endif
-		NMLOG_INFO("Done");
+		NMLOG_INFO("Done \n");
 
 	pthread_mutex_unlock(s_ptAACEncCodecMutex);
 
@@ -161,7 +172,7 @@ AACEnc_Open(
 		s_u32ReferCnt++;
 		pthread_mutex_unlock(s_ptAACEncCodecMutex);
 		*ppCodecRes = psAACEncRes;
-		NMLOG_INFO("Done, ReferCnt %u", s_u32ReferCnt);
+		NMLOG_INFO("Done, ReferCnt %u \n", s_u32ReferCnt);
 		return eNM_ERRNO_NONE;
 	} // if
 #endif	
@@ -181,13 +192,15 @@ AACEnc_Open(
 
 	if (eEncError != eAACENC_ERROR_NONE) {
 		NMLOG_ERROR("libnaacenc initialize failed: Error code 0x%08x", eEncError);
-
+		
 		// Finalize libnaacenc and free AAC encoder resource
 #ifdef NM_AACENC_MULTIOPEN
 		pthread_mutex_unlock(s_ptAACEncCodecMutex);
 #endif
 		return AACEnc_Close(ppCodecRes);
 	} // if
+
+	AACEnc_CodecBuffer(s_ai32MDCTBuf);
 
 #ifdef NM_AACENC_MULTIOPEN
 	s_u32ReferCnt++;

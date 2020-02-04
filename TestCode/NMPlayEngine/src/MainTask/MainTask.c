@@ -143,14 +143,16 @@ NVTDV_P0_000000000001.avi
 NVTDV_P0_000000000002.avi
 NVTDV_aac_h264.mp4
 EI_20120628_111548_AAC_H264.mp4
+NVTDV_P0_000000000001.mp4
+NVTDV_P0_000000000002.mp4
 */
 
 void MainTask( void *pvParameters )
 {
 	char *szDiskVolume = NULL;
 	int32_t i32Ret;
-	char *szTestAVIFile1 = "C:\\DCIM\\EI_20120628_111548_AAC_H264.mp4";
-	char *szTestAVIFile2 = "C:\\DCIM\\AmelieMovie_VGA20_H264.avi";
+	char *szTestAVIFile1 = "C:\\DCIM\\NVTDV_P0_000000000001.mp4";
+	char *szTestAVIFile2 = "C:\\DCIM\\NVTDV_P0_000000000002.mp4";
 
 	uint64_t u64StartPlayTime;
 	uint64_t u64PausePlayTime;
@@ -210,7 +212,7 @@ void MainTask( void *pvParameters )
 	u64PausePlayTime = u64StartPlayTime + 5000;
 	u64ResumePlayTime = u64PausePlayTime + 10000;
 	u64StopPlayTime = u64ResumePlayTime + 5000;
-#if 1
+#if 0
 	
 	while(NMUtil_GetTimeMilliSec() < u64PausePlayTime){
 		usleep(1000);

@@ -354,7 +354,8 @@ MP4Read_GetAudioChunkInfo(
 	MP4D__frame_offset(&psMP4ReadRes->tMP4, psMP4ReadRes->i32AudioTrackIndex, u32ChunkID, (unsigned int *)&u32FrameSize, (unsigned int *)&u32Timestamp, (unsigned int *)&u32Duration);
 
 	*pu32ChunkSize = u32FrameSize;	
-	*pu64ChunkTime = ((uint64_t)(u32Timestamp * 1000)) / psMP4ReadRes->i32AudioTrackScale;
+	uint64_t u64Timestamp = (uint64_t)u32Timestamp;
+	*pu64ChunkTime = (u64Timestamp * 1000) / (psMP4ReadRes->i32AudioTrackScale);
 	
 	if(pbSeekable)
 		*pbSeekable = true;
@@ -392,8 +393,9 @@ MP4Read_GetVideoChunkInfo(
 	tFileOffset = MP4D__frame_offset(&psMP4ReadRes->tMP4, psMP4ReadRes->i32VideoTrackIndex, u32ChunkID, (unsigned int *)&u32FrameSize, (unsigned int *)&u32Timestamp, (unsigned int *)&u32Duration);
 
 	*pu32ChunkSize = u32FrameSize;	
-	*pu64ChunkTime = ((uint64_t)(u32Timestamp * 1000)) / psMP4ReadRes->i32VideoTrackScale;
-
+	uint64_t u64Timestamp = (uint64_t)u32Timestamp;
+	*pu64ChunkTime = (u64Timestamp * 1000) / (psMP4ReadRes->i32VideoTrackScale);
+	
 	if(psMP4ReadRes->eVideoType == eNM_CTX_VIDEO_H264){
 		//Maybe insert SPS/PPS information in MP4Read_ReadAudio(), so enlarge chunk size
 		*pu32ChunkSize = u32FrameSize + (4 * 2 + psMP4ReadRes->u32SPSSize + psMP4ReadRes->u32PPSSize);
@@ -483,7 +485,8 @@ MP4Read_ReadAudio(
 	
 	//update datatime
 	psCtx->u32DataSize = u32FrameSize;	
-	psCtx->u64DataTime = ((uint64_t)(u32Timestamp * 1000)) / psMP4ReadRes->i32AudioTrackScale;
+	uint64_t u64Timestamp = (uint64_t)u32Timestamp;
+	psCtx->u64DataTime = (u64Timestamp * 1000) / (psMP4ReadRes->i32AudioTrackScale);
 	
 	return eNM_ERRNO_NONE;
 }
@@ -566,7 +569,8 @@ MP4Read_ReadVideo(
 	
 	psCtx->u32DataSize = u32FrameSize + i32ExtraSize;	
 	//update datatime
-	psCtx->u64DataTime = ((uint64_t)(u32Timestamp * 1000)) / psMP4ReadRes->i32VideoTrackScale;
+	uint64_t u64Timestamp = (uint64_t)u32Timestamp;
+	psCtx->u64DataTime = (u64Timestamp * 1000) / (psMP4ReadRes->i32VideoTrackScale);
 		
 	return eNM_ERRNO_NONE;
 }

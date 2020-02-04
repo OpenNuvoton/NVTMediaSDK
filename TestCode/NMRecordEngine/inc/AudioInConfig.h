@@ -24,7 +24,7 @@
 #ifndef __AIN_CONFIG_H__
 #define __AIN_CONFIG_H__
 
-#define AIN_CONFIG_SAMPLERATE						(8000)
+#define AIN_CONFIG_SAMPLERATE						(16000)
 #define AIN_CONFIG_CHANNEL							(1)
 #define AIN_CONFIG_FRAGMENT_DURATION				(100)
 

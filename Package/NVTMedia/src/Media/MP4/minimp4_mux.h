@@ -596,6 +596,7 @@ static int mp4e_write_fragment_header(MP4E_mux_t *mux, int track_num, int data_b
     return MP4E_STATUS_OK;
 }
 
+
 static int mp4e_write_mdat_box(MP4E_mux_t *mux, uint32_t size)
 {
     unsigned char base[8], *p = base;
@@ -609,6 +610,7 @@ static int mp4e_write_mdat_box(MP4E_mux_t *mux, uint32_t size)
 /**
 *   Add new sample to specified track
 */
+#if 0
 int MP4E_put_sample(MP4E_mux_t *mux, int track_num, const void *data, int data_bytes, int duration, int kind)
 {
     track_t *tr;
@@ -659,6 +661,53 @@ int MP4E_put_sample(MP4E_mux_t *mux, int track_num, const void *data, int data_b
     }
     return MP4E_STATUS_OK;
 }
+
+#else
+int MP4E_put_sample(MP4E_mux_t *mux, int track_num, const void *data, int data_bytes, int duration, int kind)
+{
+    track_t *tr;
+    if (!mux || !data)
+        return MP4E_STATUS_BAD_ARGUMENTS;
+    tr = ((track_t*)mux->tracks.data) + track_num;
+
+    if (mux->enable_fragmentation)
+    {
+        if (!mux->fragments_count++)
+            ERR(mp4e_flush_index(mux)); // write file headers before 1st sample
+        // write MOOF + MDAT + sample data
+        ERR(mp4e_write_fragment_header(mux, track_num, data_bytes, duration, kind));
+        // write MDAT box for each sample
+        ERR(mp4e_write_mdat_box(mux, data_bytes + 8));
+
+        if (!add_sample_descriptor(mux, tr, data_bytes, duration, kind))
+            return MP4E_STATUS_NO_MEMORY;
+
+        ERR(mux->write_callback(mux->write_pos, data, data_bytes, mux->token));
+        mux->write_pos += data_bytes;
+        return MP4E_STATUS_OK;
+    }
+		
+    if (mux->sequential_mode_flag == 0){
+        ERR(mp4e_write_mdat_box(mux, data_bytes + 8));
+		}
+		
+		if (!add_sample_descriptor(mux, tr, data_bytes, duration, kind))
+				return MP4E_STATUS_NO_MEMORY;
+
+    if (mux->sequential_mode_flag)
+    {
+        if (!minimp4_vector_put(&tr->pending_sample, data, data_bytes))
+            return MP4E_STATUS_NO_MEMORY;
+    } else
+    {
+        ERR(mux->write_callback(mux->write_pos, data, data_bytes, mux->token));
+        mux->write_pos += data_bytes;
+    }
+    return MP4E_STATUS_OK;
+}
+
+#endif
+
 
 /**
 *   calculate size of length field of OD box
@@ -1952,6 +2001,7 @@ exit_with_free:
                     else if (payload_type == 5)
                         sample_kind = MP4E_SAMPLE_RANDOM_ACCESS;
                     err = MP4E_put_sample(h->mux, h->mux_track_id, tmp, 4 + sizeof_nal, timeStamp90kHz_next, sample_kind);
+//										printf("mp4_h26x_write_nal h->mux_track_id %d, duration %d \n", h->mux_track_id, timeStamp90kHz_next);
                     free(tmp);
                 }
                 break;

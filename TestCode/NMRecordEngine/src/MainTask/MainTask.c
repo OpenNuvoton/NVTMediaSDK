@@ -54,11 +54,11 @@
 //#define ENABLE_SDIO_1
 
 #define DEF_DISK_VOLUME_STR_SIZE					20
-#define DEF_RECORD_FILE_MGR_TYPE					eFILEMGR_TYPE_AVI
+#define DEF_RECORD_FILE_MGR_TYPE					eFILEMGR_TYPE_MP4
 #define DEF_RECORD_FILE_FOLDER						"C:\\DCIM"
 #define DEF_REC_RESERVE_STOR_SPACE 				(400000000)
-#define DEF_EACH_REC_FILE_DUARTION 				(60000)					//millisecond
-#define DEF_NM_MEDIA_FILE_TYPE						eNM_MEDIA_AVI
+#define DEF_EACH_REC_FILE_DUARTION 				(60000)					//60 second
+#define DEF_NM_MEDIA_FILE_TYPE						eNM_MEDIA_MP4
 
 #if (DEF_EACH_REC_FILE_DUARTION == eNM_UNLIMIT_TIME)
 #define DEF_RECORDING_TIME				 				(60000 * 1 + 10000)
@@ -196,6 +196,7 @@ VideoIn_FillCB(
 	return false;
 }
 
+//Close current media and switch next media to current media
 static int32_t
 CloseAndChangeMedia(void)
 {
@@ -221,6 +222,7 @@ CloseAndChangeMedia(void)
 	return 0;
 }
 
+//Create and register next media
 static int32_t 
 CreateAndRegNextMedia(
 	HRECORD	hRecord,
@@ -276,6 +278,7 @@ CreateAndRegNextMedia(
 
 	FileMgr_AppendFileInfo(DEF_RECORD_FILE_MGR_TYPE, psMediaAttr->szFileName);	
 
+	//Register next media
 	eNMRet = NMRecord_RegNextMedia(hRecord, sRecIf.psMediaIF, sRecIf.pvMediaRes, NULL);
 	if(eNMRet != eNM_ERRNO_NONE){
 		NMLOG_ERROR("Unable NMRecord_RegNextMedia(): %d\n", eNMRet);
@@ -310,6 +313,7 @@ Record_StatusCB(
 			printf("Recorder status: CHANGE MEDIA \n");
 			CloseAndChangeMedia();
 			xSemaphoreTake(s_tMediaMutex, portMAX_DELAY);	
+			//Setup create next media flag
 			s_bCreateNextMedia = TRUE;
 			xSemaphoreGive(s_tMediaMutex);	
 		}
@@ -424,9 +428,10 @@ void MainTask( void *pvParameters )
 	sRecCtx.sFillAudioCtx.u32SampleRate = psAinInfo->u32SampleRate;
 	sRecCtx.sFillAudioCtx.u32Channel = psAinInfo->u32Channel;
 
-	sRecCtx.sMediaAudioCtx.eAudioType = eNM_CTX_AUDIO_ULAW;
+	sRecCtx.sMediaAudioCtx.eAudioType = eNM_CTX_AUDIO_AAC;
 	sRecCtx.sMediaAudioCtx.u32SampleRate = psAinInfo->u32SampleRate;
 	sRecCtx.sMediaAudioCtx.u32Channel = psAinInfo->u32Channel;
+	sRecCtx.sMediaAudioCtx.u32BitRate = 64000;
 	
 	sRecIf.pfnVideoFill = VideoIn_FillCB;
 	sRecIf.pfnAudioFill = AudioIn_FillCB;
@@ -448,6 +453,7 @@ void MainTask( void *pvParameters )
 	FileMgr_AppendFileInfo(DEF_RECORD_FILE_MGR_TYPE, s_sCurMediaAttr.szFileName);	
 	AudioIn_CleanPCMBuff();
 
+	//Start record
 	eNMRet = NMRecord_Record(
 		&hRecord,
 		DEF_EACH_REC_FILE_DUARTION,
@@ -475,10 +481,12 @@ void MainTask( void *pvParameters )
 		uint8_t *pu8FrameData;
 		uint64_t u64FrameTime;
 		
+		// Show preview
 		if(VideoIn_ReadNextPacketFrame(0, &pu8FrameData, &u64FrameTime) == TRUE){
 			Render_SetFrameBuffAddr(pu8FrameData);
 		}
 
+		//Setup create next media time
 		if(s_bCreateNextMedia == TRUE){
 			xSemaphoreTake(s_tMediaMutex, portMAX_DELAY);	
 			u64CreateNewMediaTime = NMUtil_GetTimeMilliSec() + (DEF_EACH_REC_FILE_DUARTION / 2);
@@ -486,6 +494,7 @@ void MainTask( void *pvParameters )
 			xSemaphoreGive(s_tMediaMutex);	
 		}
 		
+		//Creat next media
 		if(NMUtil_GetTimeMilliSec() > u64CreateNewMediaTime){
 			CreateAndRegNextMedia(hRecord, &sRecCtx);		
 			u64CreateNewMediaTime = ULLONG_MAX;
@@ -498,14 +507,17 @@ void MainTask( void *pvParameters )
 	
 	xSemaphoreTake(s_tMediaMutex, portMAX_DELAY);	
 
+	//Close next media
 	if(s_sNextMediaAttr.pvOpenRes){
 		NMRecord_Close((HRECORD)eNM_INVALID_HANDLE, &s_sNextMediaAttr.pvOpenRes);
 		if(s_sNextMediaAttr.szFileName){
+			//delete next media file
 			unlink(s_sNextMediaAttr.szFileName);
 			free(s_sNextMediaAttr.szFileName);
 		}
 	}
 
+	//Close current media
 	if(s_sCurMediaAttr.pvOpenRes){
 		NMRecord_Close(hRecord, &s_sCurMediaAttr.pvOpenRes);
 		if(s_sCurMediaAttr.szFileName)

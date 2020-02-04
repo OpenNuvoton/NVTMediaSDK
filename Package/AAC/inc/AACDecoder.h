@@ -187,7 +187,12 @@ typedef struct
 // ==================================================
 // Function declaration
 // ==================================================
-
+bool											// [out]true / false: Success / Failed
+AACDec_CodecBuffer(
+	int *i32CodecInBuffer,
+	int *i32CodecOutBuffer
+);
+	
 bool											// [out]true / false: Success / Failed
 AACDec_Initialize(
 	S_AACDEC_FILE_CALLBACK	*psAACFileCallback,	// [in]

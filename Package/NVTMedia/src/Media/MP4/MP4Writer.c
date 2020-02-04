@@ -41,11 +41,14 @@ typedef struct _S_MP4WRITE_RES {
 	int32_t i32AudioTrackID;
 	
 	uint64_t u64LastVideoDataTime;
+	uint64_t u64LastAudioDataTime;
+
 	uint64_t u64StartAVDataTime;
 	
+	bool bWriteSPSPPS;
 }S_MP4WRITE_RES;
 
-#define MP4E_SEQ_MODE (1)			//mp4 mux use sequential mode
+#define MP4E_SEQ_MODE (0)			//mp4 mux use sequential mode
 #define MP4E_FRAG_MODE (0)		//mp4 mux use fragmentation mode
 
 #define MAX_AACSRI	12
@@ -308,16 +311,19 @@ MP4Write_WriteVideo(
 			u64Duration = (psCtx->u64DataTime - psMediaRes->u64LastVideoDataTime) * DEF_MP4_VIDEO_TIMESCALE / 1000;
 		}
 		
-		if(sH264FrameInfo.eNALType & eNM_UTIL_H264_NAL_SPS){
-			i32Ret = mp4_h26x_write_nal(&psMediaRes->sMP4H264Writer, pu8ChunkData + sH264FrameInfo.u32SPSOffset, sH264FrameInfo.u32SPSLen, (unsigned)u64Duration);
-			if(i32Ret != MP4E_STATUS_OK)
-				return eNM_ERRNO_IO;
-		}
+		if(psMediaRes->bWriteSPSPPS == false){
+			if(sH264FrameInfo.eNALType & eNM_UTIL_H264_NAL_SPS){
+				i32Ret = mp4_h26x_write_nal(&psMediaRes->sMP4H264Writer, pu8ChunkData + sH264FrameInfo.u32SPSOffset, sH264FrameInfo.u32SPSLen, (unsigned)u64Duration);
+				if(i32Ret != MP4E_STATUS_OK)
+					return eNM_ERRNO_IO;
+			}
 
-		if(sH264FrameInfo.eNALType & eNM_UTIL_H264_NAL_PPS){
-			i32Ret = mp4_h26x_write_nal(&psMediaRes->sMP4H264Writer, pu8ChunkData + sH264FrameInfo.u32PPSOffset, sH264FrameInfo.u32PPSLen, (unsigned)u64Duration);
-			if(i32Ret != MP4E_STATUS_OK)
-				return eNM_ERRNO_IO;
+			if(sH264FrameInfo.eNALType & eNM_UTIL_H264_NAL_PPS){
+				i32Ret = mp4_h26x_write_nal(&psMediaRes->sMP4H264Writer, pu8ChunkData + sH264FrameInfo.u32PPSOffset, sH264FrameInfo.u32PPSLen, (unsigned)u64Duration);
+				if(i32Ret != MP4E_STATUS_OK)
+					return eNM_ERRNO_IO;
+			}
+			psMediaRes->bWriteSPSPPS = true;
 		}
 		
 		if(sH264FrameInfo.eNALType & (eNM_UTIL_H264_NAL_I | eNM_UTIL_H264_NAL_P)){
@@ -351,19 +357,27 @@ MP4Write_WriteAudio(
 
 	psMediaRes = (S_MP4WRITE_RES *)pMediaRes;
 
-	if(psMediaRes->u64StartAVDataTime == 0){
-		psMediaRes->u64StartAVDataTime = psCtx->u64DataTime;
-	}
-	else if(psCtx->u64DataTime < psMediaRes->u64StartAVDataTime){
-		psMediaRes->u64StartAVDataTime = psCtx->u64DataTime;
-	}
+	if(psMediaRes->u64LastAudioDataTime == 0){
 
-	u64Duration = (psCtx->u64DataTime - psMediaRes->u64StartAVDataTime) *  psCtx->u32SampleRate / 1000;
-	
+		if(psMediaRes->u64StartAVDataTime == 0){
+			psMediaRes->u64StartAVDataTime = psCtx->u64DataTime;
+		}
+		else if(psCtx->u64DataTime < psMediaRes->u64StartAVDataTime){
+			psMediaRes->u64StartAVDataTime = psCtx->u64DataTime;
+		}
+
+		u64Duration = (psCtx->u64DataTime - psMediaRes->u64StartAVDataTime) *  psCtx->u32SampleRate / 1000;
+	}
+	else{
+		u64Duration = (psCtx->u64DataTime - psMediaRes->u64LastAudioDataTime) * psCtx->u32SampleRate / 1000;
+	}
+		
 	i32Ret = MP4E_put_sample(psMediaRes->ptMP4Mux, psMediaRes->i32AudioTrackID, psCtx->pu8DataBuf, psCtx->u32DataSize, (int)u64Duration, MP4E_SAMPLE_RANDOM_ACCESS);
 
 	if(i32Ret != MP4E_STATUS_OK)
 		return eNM_ERRNO_IO;
+
+	psMediaRes->u64LastAudioDataTime = psCtx->u64DataTime; 
 
 	return eNM_ERRNO_NONE;
 }
