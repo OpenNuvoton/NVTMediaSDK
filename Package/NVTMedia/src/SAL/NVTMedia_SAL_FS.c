@@ -58,7 +58,7 @@ int read(
 {
 	int32_t i32Ret;
 	int32_t i32ReadCnt = 0;
-	i32Ret = fsReadFile(fildes, buf, nbyte, &i32ReadCnt);
+	i32Ret = fsReadFile(fildes, buf, nbyte, (INT *)&i32ReadCnt);
 
 	if(i32Ret < 0)
 		return i32Ret;
@@ -73,7 +73,7 @@ int write(
 {
 	int32_t i32Ret;
 	int32_t i32WriteCnt = 0;
-	i32Ret = fsWriteFile(fildes, (UINT8 *)buf, nbyte, &i32WriteCnt);
+	i32Ret = fsWriteFile(fildes, (UINT8 *)buf, nbyte, (INT *)&i32WriteCnt);
 
 	if(i32Ret < 0)
 		return i32Ret;

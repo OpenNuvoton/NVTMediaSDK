@@ -85,7 +85,7 @@
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform.1327268467" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
                             							
-                            <builder buildPath="${workspace_loc:/NMPlayEngine}/Release" id="ilg.gnuarmeclipse.managedbuild.cross.builder.537178788" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
+                            <builder buildPath="${workspace_loc:/NMRecordEngine}/Release" id="ilg.gnuarmeclipse.managedbuild.cross.builder.537178788" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
                             							
                             <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.437287622" name="GNU ARM Cross Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
                                 								
@@ -123,6 +123,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../BSP/N9H26_emWin_NonOS/BSP/Driver/Include&quot;"/>
                                     									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../BSP/N9H26_emWin_NonOS/BSP/SampleCode/VideoIn&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/POSIX_FreeRTOS/include&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../ThirdParty/POSIX_FreeRTOS/POSIX/include&quot;"/>
@@ -140,6 +142,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../inc&quot;"/>
                                     								
                                 </option>
+                                								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.530052993" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated"/>
                                 								
                                 <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.270945720" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
                                 							
@@ -175,7 +179,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_AACDecoder"/>
+                                    <listOptionValue builtIn="false" value="N9H26_AACEncoder"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_AAC"/>
                                     									
@@ -183,9 +187,15 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_GPIO"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_SPU"/>
+                                    <listOptionValue builtIn="false" value="N9H26_VideoIn"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="N9H26_EDMA"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="N9H26_AUR"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="N9H26_I2C"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     									
@@ -269,7 +279,7 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="NMPlayEngine.ilg.gnuarmeclipse.managedbuild.cross.target.elf.1589248123" name="Executable" projectType="ilg.gnuarmeclipse.managedbuild.cross.target.elf"/>
+        <project id="NMRecordEngine.ilg.gnuarmeclipse.managedbuild.cross.target.elf.1589248123" name="Executable" projectType="ilg.gnuarmeclipse.managedbuild.cross.target.elf"/>
         	
     </storageModule>
     	
@@ -293,7 +303,7 @@
         		
         <configuration configurationName="Release">
             			
-            <resource resourceType="PROJECT" workspacePath="/NMPlayEngine"/>
+            <resource resourceType="PROJECT" workspacePath="/NMRecordEngine"/>
             		
         </configuration>
         	

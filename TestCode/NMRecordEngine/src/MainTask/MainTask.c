@@ -137,7 +137,7 @@ InitFileSystem(
 	fsAssignDriveNumber(s_szDiskVolume[0], DISK_TYPE_SD_MMC, 0, 1);
 #endif
 
-	if(fsDiskFreeSpace(s_szDiskVolume[0], &u32BlockSize, &u32FreeSize, &u32DiskSize) != FS_OK){
+	if(fsDiskFreeSpace(s_szDiskVolume[0], (UINT32 *)&u32BlockSize, (UINT32 *)&u32FreeSize, (UINT32 *)&u32DiskSize) != FS_OK){
 		return -2;
 	}
 
@@ -384,7 +384,7 @@ void MainTask( void *pvParameters )
 	xTaskCreate( VideoIn_TaskCreate, "VideoIn", configMINIMAL_STACK_SIZE, NULL, mainMAIN_TASK_PRIORITY, NULL );
 	xTaskCreate( AudioIn_TaskCreate, "AudioIn", configMINIMAL_STACK_SIZE, NULL, mainMAIN_TASK_PRIORITY, NULL );
 	
-	i32Ret = FileMgr_CreateNewFileName(	DEF_RECORD_FILE_MGR_TYPE, 
+ 	i32Ret = FileMgr_CreateNewFileName(	DEF_RECORD_FILE_MGR_TYPE,
 										DEF_RECORD_FILE_FOLDER,
 										0,
 										&s_sCurMediaAttr.szFileName,

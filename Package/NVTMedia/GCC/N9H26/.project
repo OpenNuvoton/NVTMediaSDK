@@ -70,6 +70,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/src/Media/MP4/MP4Reader.c</locationURI>
 		</link>
 		<link>
+			<name>Media/MP4Writer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/src/Media/MP4/MP4Writer.c</locationURI>
+		</link>
+		<link>
 			<name>Util/Util.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/src/Util/Util.c</locationURI>
@@ -118,6 +123,11 @@
 			<name>Codec/H264Ratecontrol.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/src/Codec/H264Ratecontrol.c</locationURI>
+		</link>
+		<link>
+			<name>Codec/AACEncoder.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/src/Codec/AACEncoder.c</locationURI>
 		</link>
 		<link>
 			<name>Play/Player.c</name>

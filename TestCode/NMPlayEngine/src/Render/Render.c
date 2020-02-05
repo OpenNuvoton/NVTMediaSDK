@@ -55,11 +55,30 @@ static void InitVPOST(uint8_t* pu8FrameBuffer)
 }	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t s_u32PCMPlaybackBufSize;
-uint8_t *s_pu8PCMPlaybackBuf;
-uint32_t s_u32DataLenInPCMBuf;
+static uint32_t s_u32PCMPlaybackBufSize;
+static uint8_t *s_pu8PCMPlaybackBuf;
+static uint32_t s_u32DataLenInPCMBuf;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined (__GNUC__) && !(__CC_ARM)
+static char* ulltoStr(uint64_t val)
+{
+    static char buf[34] = { [0 ... 33] = 0 };
+    char* out = &buf[32];
+    uint64_t hval = val;
+    unsigned int hbase = 10;
+
+    do {
+        *out = "0123456789abcdef"[hval % hbase];
+        --out;
+        hval /= hbase;
+    } while(hval);
+
+    out ++;
+    return out;
+}
+#endif
 
 void
 Render_VideoFlush(
@@ -70,7 +89,11 @@ Render_VideoFlush(
 		char szInfo[100];
 	
 		u64CurTime = NMUtil_GetTimeMilliSec();
+#if defined (__GNUC__) && !(__CC_ARM)
+		sprintf(szInfo,"Render_VideoFlush %s, %s", ulltoStr(u64CurTime), ulltoStr(psVideoCtx->u64DataTime) );
+#else
 		sprintf(szInfo,"Render_VideoFlush %"PRId64", %"PRId64"", u64CurTime, psVideoCtx->u64DataTime );
+#endif
 		printf("%s \n", szInfo);
 
 		s_pu8CurFBAddr = psVideoCtx->pu8DataBuf;

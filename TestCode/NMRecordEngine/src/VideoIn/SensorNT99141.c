@@ -37,7 +37,10 @@
 
 #include "NVTMedia.h"
 
+#if defined (__GNUC__) && !(__CC_ARM)
+#else
 #define __USE_HW_I2C__
+#endif
 
 #if !defined (__USE_HW_I2C__)
 #include "DrvI2C.h"
@@ -659,7 +662,7 @@ static void VoltageDetect_callback(UINT32 u32code)
 
 #endif
 
-static int
+static int32_t
 LowLuxDet_NT99141(
 	S_SENSOR_ATTR *psSnrAttr,
 	BOOL *pbLowLuxDet
@@ -941,7 +944,7 @@ static S_SNR_FLICKER s_sSnrFlicker = {
 	.apsFlickerClockTable[eSNR_CLOCK_24] = &s_sClk24Flicker,
 };
 
-static int SetSensorFlicker_NT99141(
+static int32_t SetSensorFlicker_NT99141(
 	S_SENSOR_ATTR *psSnrAttr
 )
 {

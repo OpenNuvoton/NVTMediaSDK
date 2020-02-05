@@ -117,40 +117,76 @@ typedef struct S_VIN_CTRL{
 
 #pragma arm section zidata = "non_initialized"
 
-#if VIN_CONFIG_PORT0_PLANAR_FRAME_BUF >= 1
+	#if VIN_CONFIG_PORT0_PLANAR_FRAME_BUF >= 1
 		#if VIN_CONFIG_PORT0_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer0[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT0_PLANAR_FRAME_BUF >= 2
 		#if VIN_CONFIG_PORT0_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2)+ 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer1[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT0_PLANAR_FRAME_BUF >= 3
 		#if VIN_CONFIG_PORT0_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2)+ 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8PlanarFrameBuffer2[(VIN_CONFIG_PORT0_PLANAR_WIDTH*VIN_CONFIG_PORT0_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT0_PACKET_FRAME_BUF >= 1
-		__align(256) static uint8_t s_au8PacketFrameBuffer0[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];		
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8PacketFrameBuffer0[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#else
+		static __align(32) uint8_t s_au8PacketFrameBuffer0[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT0_PACKET_FRAME_BUF >= 2
-		__align(256) static uint8_t s_au8PacketFrameBuffer1[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8PacketFrameBuffer1[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#else
+		static __align(32) uint8_t s_au8PacketFrameBuffer1[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT0_PACKET_FRAME_BUF >= 3
-		__align(256) static uint8_t s_au8PacketFrameBuffer2[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];	
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8PacketFrameBuffer2[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#else
+		static __align(32) uint8_t s_au8PacketFrameBuffer2[(VIN_CONFIG_PORT0_PACKET_WIDTH*VIN_CONFIG_PORT0_PACKET_HEIGHT*2)+ 256];
+		#endif
 	#endif
 
 #pragma arm section zidata // back to default (.bss section)
@@ -226,38 +262,74 @@ typedef struct S_VIN_CTRL{
 	
 	#if VIN_CONFIG_PORT1_PLANAR_FRAME_BUF >= 1
 		#if VIN_CONFIG_PORT1_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2)];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer0[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT1_PLANAR_FRAME_BUF >= 2
 		#if VIN_CONFIG_PORT1_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2)];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer1[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT1_PLANAR_MAX_FRAME_BUF >= 3
 		#if VIN_CONFIG_PORT1_PLANAR_FORMAT == VIN_CONFIG_COLOR_PLANAR_MACRO_YUV420
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32))) uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*3/2) + 256];
+			#endif
 		#else
-			__align(256) static uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2)];
+			#if defined (__GNUC__) && !(__CC_ARM)
+			static __attribute__ ((aligned (32)) uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#else
+			static __align(32) uint8_t s_au8Port1PlanarFrameBuffer2[(VIN_CONFIG_PORT1_PLANAR_WIDTH*VIN_CONFIG_PORT1_PLANAR_HEIGHT*2) + 256];
+			#endif
 		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT1_PACKET_FRAME_BUF >= 1
-		__align(256) static uint8_t s_au8Port1PacketFrameBuffer0[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];		
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8Port1PacketFrameBuffer0[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#else
+		static __align(32) uint8_t s_au8Port1PacketFrameBuffer0[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT1_PACKET_FRAME_BUF >= 2
-		__align(256) static uint8_t s_au8Port1PacketFrameBuffer1[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8Port1PacketFrameBuffer1[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#else
+		static __align(32) uint8_t s_au8Port1PacketFrameBuffer1[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#endif
 	#endif
 
 	#if VIN_CONFIG_PORT1_PACKET_FRAME_BUF >= 3
-		__align(256) static uint8_t s_au8Port1PacketFrameBuffer2[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];	
+		#if defined (__GNUC__) && !(__CC_ARM)
+		static __attribute__ ((aligned (32))) uint8_t s_au8Port1PacketFrameBuffer2[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#else
+		static __align(32) uint8_t s_au8Port1PacketFrameBuffer2[(VIN_CONFIG_PORT1_PACKET_WIDTH*VIN_CONFIG_PORT1_PACKET_HEIGHT*2)];
+		#endif
 	#endif
 
 #pragma arm section zidata // back to default (.bss section)

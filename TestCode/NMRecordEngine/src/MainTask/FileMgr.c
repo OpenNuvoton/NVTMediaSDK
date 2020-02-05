@@ -20,6 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#if defined (__GNUC__) && !(__CC_ARM)
+#include <strings.h>
+#include <inttypes.h>
+#endif
 
 #include "NVTMedia.h"
 #include "NVTMedia_SAL_FS.h"
@@ -128,6 +132,27 @@ basename(
 
 #endif
 
+#if defined (__GNUC__) && !(__CC_ARM)
+static char* ulltoStr(uint64_t val)
+{
+    static char buf[34] = { [0 ... 33] = 0 };
+    char* out = &buf[32];
+    uint64_t hval = val;
+    unsigned int hbase = 10;
+
+    do {
+        *out = "0123456789abcdef"[hval % hbase];
+        --out;
+        hval /= hbase;
+    } while(hval);
+
+//    *out-- = 'x', *out = '0';
+//   *out = '0';
+    out ++;
+    return out;
+}
+#endif
+
 static void GetFNPostIdx(
 	uint64_t *pu64PostIdx,
 	uint32_t u32FNPostOffset
@@ -141,7 +166,11 @@ static void GetFNPostIdx(
 
 	u32CurTime += u32FNPostOffset;
 
+#if defined (__GNUC__) && !(__CC_ARM)
+	psCurTm = localtime((const time_t *)&u32CurTime);
+#else
 	psCurTm = localtime(&u32CurTime);
+#endif
 	u32Year = psCurTm->tm_year + 1900;   		//since 1900
 
 	if (u32Year < 2000)
@@ -360,7 +389,7 @@ CheckAndFreeStoargeSpace(
 	char *szDiskVolumt;
 	
 	szDiskVolumt = MainTask_GetDiskVolume();
-	if(fsDiskFreeSpace(szDiskVolumt[0], &u32BlockSize, &u32FreeSize, &u32DiskSize) != FS_OK)
+	if(fsDiskFreeSpace(szDiskVolumt[0], (UINT32 *)&u32BlockSize, (UINT32 *)&u32FreeSize, (UINT32 *)&u32DiskSize) != FS_OK)
 		return ERR_FILEMGR_WORK_FOLDER;
 
 	u64DiskAvailSpace = (uint64_t)u32FreeSize * 1024;
@@ -411,8 +440,13 @@ CheckAndFreeStoargeSpace(
 
 	while ((psRmFileEnt) && (psRmFileEnt != psCurFileEnt)) {
 		pchInstIdxStr[u32InstIdxPos] = '0' + psRmFileEnt->u32InstIdx;
+#if defined (__GNUC__) && !(__CC_ARM)
+		sprintf(pchFileFullPath, "%s\\%s%s%012s%s", pchFolder, pchFilePrefixStr, pchInstIdxStr, ulltoStr(psRmFileEnt->u64PostIdx), pchFileExtStr);
+#else
 		sprintf(pchFileFullPath, "%s\\%s%s%012"PRId64"%s",
 				pchFolder, pchFilePrefixStr, pchInstIdxStr, psRmFileEnt->u64PostIdx, pchFileExtStr);
+#endif
+
 		fsAsciiToUnicode(pchFileFullPath, szUnicodeFileName, TRUE); 
 		fsDeleteFile(szUnicodeFileName, NULL);
 		NMLOG_INFO("Recycle file : %s \n ", pchFileFullPath);
@@ -642,6 +676,8 @@ FreeFileList(
 // API implement
 ////////////////////////////////////////////////////////////////////////
 
+
+
 int32_t
 FileMgr_CreateNewFileName(
 	E_FILEMGR_TYPE eFileType,
@@ -683,7 +719,7 @@ FileMgr_CreateNewFileName(
 	pchFilePath = malloc(strlen(pchSaveFolder) + strlen(DEFAULT_DSC_FN_PREFIX) + 50);
 
 	if (pchFilePath == NULL)
-		return NULL;
+		return -3;
 
 	ERRCODE  eRet;
 
@@ -691,7 +727,7 @@ FileMgr_CreateNewFileName(
 
 	if (eRet != ERR_FILEMGR_NONE) {
 		NMLOG_ERROR("FileMgr_CreateNewFile failed %x \n", eRet);
-		return NULL;
+		return -4;
 	}
 
 
@@ -708,13 +744,16 @@ FileMgr_CreateNewFileName(
 
 	if (pchInstIdxStr == NULL) {
 		NMLOG_ERROR("strdup instance index failed \n");
-		return NULL;
+		return -5;
 	}
 
 	pchInstIdxStr[u32InstIdxPos] = (i32InstIdx % 10) + '0';
 
-	sprintf(pchFilePath, "%s\\%s%s%012"PRId64"%s", pchSaveFolder, pchFilePrefixStr, pchInstIdxStr, u64FNPostIdx,
-			pchFileExtStr);
+#if defined (__GNUC__) && !(__CC_ARM)
+	sprintf(pchFilePath, "%s\\%s%s%012s%s", pchSaveFolder, pchFilePrefixStr, pchInstIdxStr, ulltoStr(u64FNPostIdx), pchFileExtStr);
+#else
+	sprintf(pchFilePath, "%s\\%s%s%012"PRId64"%s", pchSaveFolder, pchFilePrefixStr, pchInstIdxStr, u64FNPostIdx, pchFileExtStr);
+#endif
 
 #if 0
 	fsAsciiToUnicode(pchFilePath, szUnicodeFileName, TRUE); 
