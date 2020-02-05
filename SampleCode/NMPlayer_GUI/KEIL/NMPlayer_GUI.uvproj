@@ -497,9 +497,9 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
             </File>
             <File>
-              <FileName>libAACDecoder.lib</FileName>
+              <FileName>N9H26_AACDecoder.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\libAACDecoder.lib</FilePath>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACDecoder.lib</FilePath>
             </File>
             <File>
               <FileName>ImgProc.lib</FileName>
@@ -1165,9 +1165,9 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
             </File>
             <File>
-              <FileName>libAACDecoder.lib</FileName>
+              <FileName>N9H26_AACDecoder.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\libAACDecoder.lib</FilePath>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACDecoder.lib</FilePath>
             </File>
             <File>
               <FileName>ImgProc.lib</FileName>
@@ -1833,9 +1833,9 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
             </File>
             <File>
-              <FileName>libAACDecoder.lib</FileName>
+              <FileName>N9H26_AACDecoder.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\libAACDecoder.lib</FilePath>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACDecoder.lib</FilePath>
             </File>
             <File>
               <FileName>ImgProc.lib</FileName>
@@ -2501,9 +2501,9 @@
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\POSIX_FreeRTOS.lib</FilePath>
             </File>
             <File>
-              <FileName>libAACDecoder.lib</FileName>
+              <FileName>N9H26_AACDecoder.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\libAACDecoder.lib</FilePath>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_AACDecoder.lib</FilePath>
             </File>
             <File>
               <FileName>ImgProc.lib</FileName>
