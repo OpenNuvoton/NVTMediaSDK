@@ -461,9 +461,9 @@
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_AAC.lib</FilePath>
             </File>
             <File>
-              <FileName>N9H26_NVTFAT_FREERTOS.lib</FileName>
+              <FileName>N9H26_NVTFAT_FREERTOS_1B.lib</FileName>
               <FileType>4</FileType>
-              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS.lib</FilePath>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS_1B.lib</FilePath>
             </File>
             <File>
               <FileName>POSIX_FreeRTOS.lib</FileName>
