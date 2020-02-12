@@ -377,7 +377,7 @@
               <MiscControls>--c99</MiscControls>
               <Define>__N9H26__ STORAGE_SD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\..\..\BSP\N9H26_emWin_NonOS\BSP\ThirdParty\emWin\Include;..\inc;..\..\..\Package\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include\portable</IncludePath>
+              <IncludePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Driver\Include;..\..\..\BSP\N9H26_emWin_NonOS\BSP\ThirdParty\emWin\Include;..\..\..\BSP\N9H26_emWin_NonOS\BSP\SampleCode\VideoIn;..\inc;..\..\..\Package\NVTMedia\inc;..\..\..\ThirdParty\POSIX_FreeRTOS\include;..\..\..\ThirdParty\POSIX_FreeRTOS\include\private;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include;..\..\..\ThirdParty\POSIX_FreeRTOS\FreeRTOS\Source\include;..\..\..\ThirdParty\POSIX_FreeRTOS\Portable\N9H26\ARMCC;..\..\..\ThirdParty\POSIX_FreeRTOS\POSIX\include\portable</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
