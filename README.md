@@ -1,9 +1,9 @@
 # NVTMediaSDK
-NVTMediaSDK is a media software development kit for Nuvoton's ARM9 MPUs. It helps to simplify programming of media player and recorder.
+NVTMediaSDK is a media software development kit for Nuvoton's N9H26 MPUs. It helps to simplify programming of media player and recorder.
 
 ----
 ## Major components in this repository
-- BSP/ -- Nuvoton ARM9 family BSP
+- BSP/ -- Nuvoton N9H26 BSP
 - Doc/ -- Documents
 - Package/ -- Libraries source
 - PrebuildLib/ -- Prebuild libraries
@@ -30,5 +30,4 @@ a. Run
 
 ----
 ## TODO list
-1. Recorder
-2. MP3 codec
+1. MP3 codec
