@@ -295,7 +295,7 @@ static void * AudioDeocdeWorkerThread( void * pvArgs )
 		}
 
 #if _DECODE_DEBUG_
-		NMLOG_DEBUG("Audio each chunk diff time(chunk data time) %d, decode time %d \n", (uint32_t)(psAudioMediaCtx->u64DataTime - u64PrevChunkDataTime), (uint32_t)(NMUtil_GetTimeMilliSec() - u64StartDecTime));
+//		NMLOG_DEBUG("Audio each chunk diff time(chunk data time) %d, decode time %d \n", (uint32_t)(psAudioMediaCtx->u64DataTime - u64PrevChunkDataTime), (uint32_t)(NMUtil_GetTimeMilliSec() - u64StartDecTime));
 		u64PrevChunkDataTime = psAudioMediaCtx->u64DataTime;
 
 #endif		

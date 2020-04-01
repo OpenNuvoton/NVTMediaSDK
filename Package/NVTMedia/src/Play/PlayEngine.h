@@ -29,7 +29,7 @@
 #include "NVTMedia_SAL_OS.h"
 
 #define _DEMUX_DEBUG_ 0
-#define _DECODE_DEBUG_ 1
+#define _DECODE_DEBUG_ 0
 
 struct s_play_engine_res;
 

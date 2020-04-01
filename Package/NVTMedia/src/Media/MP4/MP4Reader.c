@@ -419,8 +419,14 @@ MP4Read_GetVideoChunkInfo(
 				return eNM_ERRNO_IO;
 			}
 
-			//overwrite frame szie feild, use NALU start code instead 
-			memcpy(pu8H264FrameBuf, &u32NALUStartCode , 4);
+			//overwrite frame szie feild, using NALU start code instead 
+			uint32_t u32Temp = 0;
+			uint32_t u32NALSize;
+			while(u32Temp < u32FrameSize){
+				u32NALSize = (pu8H264FrameBuf[u32Temp + 3])|(pu8H264FrameBuf[u32Temp + 2]  << 8)|(pu8H264FrameBuf[u32Temp + 1] << 16)|(pu8H264FrameBuf[u32Temp] << 24); 
+				memcpy(pu8H264FrameBuf + u32Temp, &u32NALUStartCode, 4);
+				u32Temp += (u32NALSize + 4);
+			}
 
 			S_NM_UTIL_H264_FRAME_INFO sFrameInfo;
 			NMUtil_ParseH264Frame(pu8H264FrameBuf, u32FrameSize, &sFrameInfo);
@@ -538,11 +544,19 @@ MP4Read_ReadVideo(
 		return eNM_ERRNO_IO;
 
 	psCtx->bKeyFrame = true;
-	
+		
 	if(psMP4ReadRes->eVideoType == eNM_CTX_VIDEO_H264){
 		S_NM_UTIL_H264_FRAME_INFO sFrameInfo;
 
-		//overwrite frame szie feild, use NALU start code instead 
+		//overwrite frame szie feild, using NALU start code instead 
+		uint32_t u32Temp = 0;
+		uint32_t u32NALSize;
+		while(u32Temp < u32FrameSize){
+			u32NALSize = (pu8DataBuf[u32Temp + 3])|(pu8DataBuf[u32Temp + 2]  << 8)|(pu8DataBuf[u32Temp + 1] << 16)|(pu8DataBuf[u32Temp] << 24); 
+			memcpy(pu8DataBuf + u32Temp, &u32NALUStartCode, 4);
+			u32Temp += (u32NALSize + 4);
+		}
+
 		memcpy(pu8DataBuf, &u32NALUStartCode , 4);
 
 		NMUtil_ParseH264Frame(pu8DataBuf, u32FrameSize, &sFrameInfo);

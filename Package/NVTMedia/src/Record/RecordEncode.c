@@ -35,6 +35,7 @@
 #include "Util/NMAudioList.h"
 
 #define MAX_ENCODED_FRAMES	1
+#define _ENCODE_DEBUG_ 0
 
 typedef enum {
 	eENCODE_THREAD_STATE_INIT,
@@ -190,6 +191,11 @@ static void * VideoEnocdeWorkerThread( void * pvArgs )
 		u64VideoInPeriod = 10;
 	}
 
+#if _ENCODE_DEBUG_
+	uint64_t u64StartEncTime;
+#endif
+
+	
 	while(psVideoEncPriv->eEncThreadState != eENCODE_THREAD_STATE_TO_EXIT){
 
 		RunVideoEncCmd(psVideoEncodeRes);
@@ -226,9 +232,18 @@ static void * VideoEnocdeWorkerThread( void * pvArgs )
 		bPutVideoList = false;
 		
 		if(psVideoEncodeRes->pvVideoCodecRes){
+
+#if _ENCODE_DEBUG_
+			u64StartEncTime = NMUtil_GetTimeMilliSec();
+#endif		
+
 			eNMRet = psVideoEncodeRes->psVideoCodecIF->pfnEncodeVideo(psVideoFillCtx, psVideoMediaCtx, &u32RemainDataSize, psVideoEncodeRes->pvVideoCodecRes);
 			bPutVideoList = true;
 
+#if _ENCODE_DEBUG_
+			NMLOG_DEBUG("Video each chunk encode time %d \n", (uint32_t)(NMUtil_GetTimeMilliSec() - u64StartEncTime));
+#endif		
+			
 			//check remain data size
 			if((eNMRet == eNM_ERRNO_NONE) && (u32RemainDataSize)){
 				//realloc new encode buffer
