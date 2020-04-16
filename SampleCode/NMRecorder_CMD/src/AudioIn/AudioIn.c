@@ -125,6 +125,7 @@ OpenAinDev(
     PFN_AUR_CALLBACK pfnOldCallback;
     int32_t i32Idx;
 
+	//Sample rate support list
     uint32_t au32ArraySampleRate[] =
     {
         eAUR_SPS_48000,
@@ -136,6 +137,7 @@ OpenAinDev(
 
     uint32_t u32MaxSupport = sizeof(au32ArraySampleRate) / sizeof(au32ArraySampleRate[0]);
 
+	//Checking sample rate in support list or not
     for (i32Idx = 0; i32Idx < u32MaxSupport ; i32Idx = i32Idx + 1)
     {
         if (psAinInfo->u32SampleRate == au32ArraySampleRate[i32Idx])
@@ -147,6 +149,7 @@ OpenAinDev(
         }
     }
 
+	//Open audio record device
     DrvAUR_Open(eMicType, TRUE);
     DrvAUR_InstallCallback(AudioRecordSampleDone, &pfnOldCallback);
 
@@ -229,6 +232,7 @@ int32_t AudioInDeviceInit(
     return 0;
 }
 
+//Audio-In task.
 static void AinFrameLoop(
     S_AIN_CTRL *psAinCtrl
 )
@@ -241,7 +245,9 @@ static void AinFrameLoop(
 
     while (1)
     {
-        xSemaphoreTake(psAinCtrl->tAinISRSem, portMAX_DELAY);
+ 		//Wait audio-in ISR semaphore
+		xSemaphoreTake(psAinCtrl->tAinISRSem, portMAX_DELAY);
+		//lock PCM index mutex
         xSemaphoreTake(psAinCtrl->tPCMIndexMutex, portMAX_DELAY);
 
         psAinCtrl->u64LastFrameTimestamp = NMUtil_GetTimeMilliSec();
@@ -274,6 +280,7 @@ static void AinFrameLoop(
         psAinCtrl->u32PCMInIdx = psAinCtrl->u32PCMInIdx + psAinCtrl->u32PCMFragBufSize;
         s_bIsEDMABufferDone = 0;
 
+		//unlock PCM index mutex
         xSemaphoreGive(psAinCtrl->tPCMIndexMutex);
     }
 }
@@ -334,6 +341,7 @@ AudioIn_GetInfo(void)
     return &s_sAinCtrl.sAinInfo;
 }
 
+//Clean all PCM data
 void
 AudioIn_CleanPCMBuff(void)
 {

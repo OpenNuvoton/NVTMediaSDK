@@ -38,7 +38,7 @@ static void VPOST_InterruptServiceRiuntine()
 	vpostSetFrameBuffer((uint32_t)s_pu8CurFBAddr);
 }
 
-
+//Init VPOST 
 static void InitVPOST(uint8_t* pu8FrameBuffer)
 {		
 	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
@@ -97,6 +97,8 @@ Render_VideoFlush(
 #endif
 		printf("%s \n", szInfo);
 #endif
+	
+		//Update frame buffer address	
 		s_pu8CurFBAddr = psVideoCtx->pu8DataBuf;
 }
 
@@ -110,6 +112,7 @@ Render_AudioFlush(
 	
 //	printf("Render_AudioFlush %d, %d, %d\n", (uint32_t)u64CurTime, (uint32_t)psAudioCtx->u64DataTime, psAudioCtx->u32DataSize);
 
+	//Copy PCM data to PCM playback buufer
 	if(psAudioCtx->u32DataSize <= s_u32PCMPlaybackBufSize - s_u32DataLenInPCMBuf){
 		memcpy(s_pu8PCMPlaybackBuf + s_u32DataLenInPCMBuf, psAudioCtx->pu8DataBuf, psAudioCtx->u32DataSize);
 		s_u32DataLenInPCMBuf += psAudioCtx->u32DataSize;
@@ -119,6 +122,7 @@ Render_AudioFlush(
 	}
 
 	if(s_u32DataLenInPCMBuf){
+		//Send PCM data to PCM playback engine
 		PCMPlayback_Send(s_pu8PCMPlaybackBuf, &s_u32DataLenInPCMBuf);
 	}
 }
@@ -143,6 +147,7 @@ Render_Init(
 		return -1;
 	}
 
+	//Allocate PCM playback buffer
 	s_u32PCMPlaybackBufSize = u32AudioSampleRate * u32AudioChannel * 2;	//1Sec buffer size
 	s_pu8PCMPlaybackBuf = malloc(s_u32PCMPlaybackBufSize);
 	s_u32DataLenInPCMBuf = 0;

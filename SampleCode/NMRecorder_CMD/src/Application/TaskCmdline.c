@@ -70,6 +70,7 @@ static S_PAGE_HANDLE s_RecordPage = {
 
 static S_RECORD_PAGE_PRIV s_RecordPagePriv;
 
+//Init record page
 static int RecordPage_Init(void *pvArgv)
 {
 	return 	Recorder_start((uint32_t)pvArgv);
@@ -91,6 +92,7 @@ static struct s_page_handle* RecordPage_Action(
 	{
 		case 'q':
 		{
+			//Stop record and return main page
 			S_PAGE_HANDLE *psPrevPage;
 			Recorder_stop();
 			psPrevPage = s_RecordPage.psPrevPage;
@@ -143,20 +145,23 @@ static void MainPage_Info(void){
 
 extern void *worker_recorder(void *pvParameters);
 
+//Init main page
 static int MainPage_Init(void *pvArgv)
 {
     pthread_t pxMain_worker;
     pthread_attr_t attr;
 
+	//Create recorder worker thread
     pthread_attr_init(&attr);
     pthread_attr_setstacksize(&attr, 32 * 1024);
     pthread_create(&pxMain_worker, &attr, worker_recorder, NULL);
 
+	//Default recording duration is eNM_UNLIMIT_TIME
 	s_MainPagePriv.u32DurationTime = eNM_UNLIMIT_TIME;
 
 	s_MainPage.pvPriv = &s_MainPagePriv;
 
-	while(1){ //Wait video In ready
+	while(1){ //Wait Video-in device ready
 		uint8_t *pu8FrameData;
 		uint64_t u64FrameTime;
 
@@ -204,6 +209,7 @@ static struct s_page_handle* MainPage_Action(
 		{
 			int32_t i32Ret;
 			
+			//Enter record page
 			i32Ret = RecordPage_Init((void *)psPriv->u32DurationTime);
 			if(i32Ret == 0){
 				s_RecordPage.psPrevPage = &s_MainPage;
@@ -213,6 +219,7 @@ static struct s_page_handle* MainPage_Action(
 		break;
 		case 't':
 		{
+			//Key-in recording duration time
 			printf("Please key-in duration time (ms):");
 			psPriv->u32DurationTime = ReadTime();
 			printf("\n");			
@@ -238,8 +245,10 @@ void *worker_cmdline(void *pvArgs)
 	
 	//Read key from stdin and do action
 	while(psCurPage){
+		//Show page information
 		psCurPage->pfnPageInfo();
-		i8Key = sysGetChar();		//FIXME: sysGetChar() is wait busy function, maybe write another getchar() for thread yelid 
+		i8Key = sysGetChar();		//Get character from stdin
+		//Do page action
 		psCurPage = psCurPage->pfnPageAction(i8Key);
 	}
 

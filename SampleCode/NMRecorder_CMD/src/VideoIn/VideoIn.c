@@ -965,6 +965,7 @@ VideoInDeviceInit(
     return 0;
 }
 
+//Video-In task
 static void VinFrameLoop(
     S_VIN_PORT_OP   *psPortOP
 )
@@ -980,7 +981,9 @@ static void VinFrameLoop(
 
     while (1)
     {
+		//Wait Video-In ISR semaphore
         xSemaphoreTake(psPortOP->tVinISRSem, portMAX_DELAY);
+		//Lock frame index mutex
         xSemaphoreTake(psPortOP->tFrameIndexMutex, portMAX_DELAY);
 
         for (i = 0; i < i32MaxPlanarFrameCnt; i ++)
@@ -1023,6 +1026,7 @@ static void VinFrameLoop(
             }
         }
 
+		//Unlock frame index mutex
         xSemaphoreGive(psPortOP->tFrameIndexMutex);
 
         u64CurTime = NMUtil_GetTimeMilliSec();
@@ -1035,6 +1039,7 @@ static void VinFrameLoop(
         psPortOP->sVinDev.SetShadowRegister();
 #endif
 
+		//Calculate FPS
         if (u64CalFPSTime >= 5000)
         {
             uint32_t u32NewFPS;

@@ -63,6 +63,7 @@ InitFileSystem(
 	//Init file system library 
 	fsInitFileSystem();
 
+	//Open SD card
 #if defined(ENABLE_SD_ONE_PART)
 	sicIoctl(SIC_SET_CLOCK, u32PllOutHz/1000, 0, 0);	
 #if defined(ENABLE_SDIO_1)
@@ -101,6 +102,7 @@ InitFileSystem(
 
 	sprintf(s_szDiskVolume, "C");
 
+	//mount SD to file system
 #if defined(ENABLE_SD_ONE_PART)
 	fsAssignDriveNumber(s_szDiskVolume[0], DISK_TYPE_SD_MMC, 0, 1);
 #endif
@@ -183,23 +185,29 @@ void MainTask( void *pvParameters )
 		return;
 	}
 
+	//Show media information
 	PrintMediaInfo(&sPlayInfo, &sPlayCtx.sMediaVideoCtx, &sPlayCtx.sMediaAudioCtx);
 	
+	//Setup audio/video flush callback
 	sPlayIF.pfnVideoFlush = Render_VideoFlush;
 	sPlayIF.pfnAudioFlush = Render_AudioFlush;
 		
+	//Setup video flush context
 	sPlayCtx.sFlushVideoCtx.eVideoType = eNM_CTX_VIDEO_YUV422;
 	sPlayCtx.sFlushVideoCtx.u32Width = LCD_PANEL_WIDTH;
 	sPlayCtx.sFlushVideoCtx.u32Height = LCD_PANEL_HEIGHT;
 
+	//Setup audio flush contex
 	sPlayCtx.sFlushAudioCtx.eAudioType = eNM_CTX_AUDIO_PCM_L16;
 	sPlayCtx.sFlushAudioCtx.u32SampleRate = sPlayCtx.sMediaAudioCtx.u32SampleRate;
 	sPlayCtx.sFlushAudioCtx.u32Channel = sPlayCtx.sMediaAudioCtx.u32Channel;
 	sPlayCtx.sFlushAudioCtx.u32SamplePerBlock = sPlayCtx.sMediaAudioCtx.u32SamplePerBlock;
 	sPlayCtx.sFlushAudioCtx.pvParamSet = sPlayCtx.sMediaAudioCtx.pvParamSet;
 	
+	//Init VPOST and SPU
 	Render_Init(sPlayCtx.sFlushAudioCtx.u32SampleRate, sPlayCtx.sFlushAudioCtx.u32Channel);
 	
+	//Start Play
 	eNMRet = NMPlay_Play(&hPlay, &sPlayIF, &sPlayCtx, true);
 	if(eNMRet != eNM_ERRNO_NONE){
 		NMPlay_Close(hPlay, &pvOpenRes);
@@ -218,11 +226,13 @@ void MainTask( void *pvParameters )
 		usleep(1000);
 	}
 
+	//Pause
 	NMPlay_Pause(hPlay, true);
 	while(NMUtil_GetTimeMilliSec() < u64ResumePlayTime){
 		usleep(1000);
 	}
 
+	//Continue play
 	NMPlay_Play(&hPlay, NULL, NULL, true);
 
 	u64PausePlayTime = NMUtil_GetTimeMilliSec() + 5000;
@@ -232,14 +242,16 @@ void MainTask( void *pvParameters )
 		usleep(1000);
 	}
 
+	//Pause
 	NMPlay_Pause(hPlay, true);
 	while(NMUtil_GetTimeMilliSec() < u64ResumePlayTime){
 		usleep(1000);
 	}
 
+	//Continue play
 	NMPlay_Play(&hPlay, NULL, NULL, true);
 
-	
+	//Checking media play status
 	while(NMPlay_Status(hPlay) != eNM_PLAY_STATUS_EOM){
 		usleep(1000);
 	}
@@ -250,8 +262,10 @@ void MainTask( void *pvParameters )
 	}
 #endif
 	
+	//Close media
 	NMPlay_Close(hPlay, &pvOpenRes);
 
+	//Final VPOST and SPU
 	Render_Final();
 	
 	printf("***********Start play avi file 2 *************** \n");
@@ -263,21 +277,26 @@ void MainTask( void *pvParameters )
 		return;
 	}
 	
+	//Setup video and audio flush callback
 	sPlayIF.pfnVideoFlush = Render_VideoFlush;
 	sPlayIF.pfnAudioFlush = Render_AudioFlush;
-		
+	
+	//Setup video flush context
 	sPlayCtx.sFlushVideoCtx.eVideoType = eNM_CTX_VIDEO_YUV422;
 	sPlayCtx.sFlushVideoCtx.u32Width = LCD_PANEL_WIDTH;
 	sPlayCtx.sFlushVideoCtx.u32Height = LCD_PANEL_HEIGHT;
 
+	//Setup audio flush context
 	sPlayCtx.sFlushAudioCtx.eAudioType = eNM_CTX_AUDIO_PCM_L16;
 	sPlayCtx.sFlushAudioCtx.u32SampleRate = sPlayCtx.sMediaAudioCtx.u32SampleRate;
 	sPlayCtx.sFlushAudioCtx.u32Channel = sPlayCtx.sMediaAudioCtx.u32Channel;
 	sPlayCtx.sFlushAudioCtx.u32SamplePerBlock = sPlayCtx.sMediaAudioCtx.u32SamplePerBlock;
 	sPlayCtx.sFlushAudioCtx.pvParamSet = sPlayCtx.sMediaAudioCtx.pvParamSet;
 	
+	//Init VPOST and SPU
 	Render_Init(sPlayCtx.sFlushAudioCtx.u32SampleRate, sPlayCtx.sFlushAudioCtx.u32Channel);
 	
+	//Start play
 	hPlay = (HPLAY)eNM_INVALID_HANDLE;
 	eNMRet = NMPlay_Play(&hPlay, &sPlayIF, &sPlayCtx, true);
 	if(eNMRet != eNM_ERRNO_NONE){
@@ -296,26 +315,33 @@ void MainTask( void *pvParameters )
 		usleep(1000);
 	}
 
+	//pause
 	NMPlay_Pause(hPlay, true);
 	while(NMUtil_GetTimeMilliSec() < u64ResumePlayTime){
 		usleep(1000);
 	}
 	
+	//Seek
 	NMPlay_Seek(hPlay, 120000, sPlayInfo.u32VideoChunks, sPlayInfo.u32AudioChunks, true);
 	
+	//Continue play
 	NMPlay_Play(&hPlay, NULL, NULL, true);
 	while(NMUtil_GetTimeMilliSec() < u64StopPlayTime){
 		usleep(1000);
 	}
 
+	//Seek
 	NMPlay_Seek(hPlay, 5000, sPlayInfo.u32VideoChunks, sPlayInfo.u32AudioChunks, true);
 
+	//Continue play
 	NMPlay_Play(&hPlay, NULL, NULL, true);
 	while(NMPlay_Status(hPlay) != eNM_PLAY_STATUS_EOM){
 		usleep(1000);
 	}
 	
+	//Close
 	NMPlay_Close(hPlay, &pvOpenRes);
 
+	//Final VPOST and SPU
 	Render_Final();
 }

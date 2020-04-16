@@ -91,17 +91,21 @@ CloseAndChangeMedia(void)
 	
 	xSemaphoreTake(g_sRecorder.m_tMediaMutex, portMAX_DELAY);	
 
+	//Close current media
 	if(g_sRecorder.m_sCurMediaAttr.pvOpenRes)
 		NMRecord_Close((HRECORD)eNM_INVALID_HANDLE, &g_sRecorder.m_sCurMediaAttr.pvOpenRes);
 		
 	if(g_sRecorder.m_sCurMediaAttr.szFileName){
+		//Update current media information to file manager
 		FileMgr_UpdateFileInfo(DEF_RECORD_FILE_MGR_TYPE, g_sRecorder.m_sCurMediaAttr.szFileName);
 		free(g_sRecorder.m_sCurMediaAttr.szFileName);
 	}
 		
+	//Change current media to next media
 	g_sRecorder.m_sCurMediaAttr.pvOpenRes = g_sRecorder.m_sNextMediaAttr.pvOpenRes;
 	g_sRecorder.m_sCurMediaAttr.szFileName = g_sRecorder.m_sNextMediaAttr.szFileName;
 	
+	//Set next media to empty
 	g_sRecorder.m_sNextMediaAttr.pvOpenRes = NULL;
 	g_sRecorder.m_sNextMediaAttr.szFileName = NULL;
 	
@@ -137,6 +141,7 @@ CreateAndRegNextMedia(
 		psMediaAttr = &g_sRecorder.m_sNextMediaAttr;
 	}
 	
+	//Get new file name from file manager
 	i32Ret = FileMgr_CreateNewFileName(	DEF_RECORD_FILE_MGR_TYPE, 
 										DEF_RECORD_FILE_FOLDER,
 										0,
@@ -149,6 +154,7 @@ CreateAndRegNextMedia(
 		return i32Ret;		
 	}
 	
+	//Open new media
 	eNMRet = NMRecord_Open(
 		psMediaAttr->szFileName,
 		DEF_NM_MEDIA_FILE_TYPE,
@@ -163,9 +169,10 @@ CreateAndRegNextMedia(
 		return eNMRet;		
 	}
 
+	//Append new file name to file manager
 	FileMgr_AppendFileInfo(DEF_RECORD_FILE_MGR_TYPE, psMediaAttr->szFileName);	
 
-	//Register next media
+	//Register new media to next media
 	eNMRet = NMRecord_RegNextMedia(hRecord, sRecIf.psMediaIF, sRecIf.pvMediaRes, NULL);
 	if(eNMRet != eNM_ERRNO_NONE){
 		NMLOG_ERROR("Unable NMRecord_RegNextMedia(): %d\n", eNMRet);
@@ -243,9 +250,10 @@ Record_StatusCB(
         break;
     case eNM_RECORD_STATUS_CHANGE_MEDIA:
         printf("Recorder status: CHANGE MEDIA \n");
+		//Current media is finish. Start record next media. 
 		CloseAndChangeMedia();
 		xSemaphoreTake(g_sRecorder.m_tMediaMutex, portMAX_DELAY);	
-		//Setup create next media flag
+		//Set create next media flag
 		g_sRecorder.m_bCreateNextMedia = TRUE;
 		xSemaphoreGive(g_sRecorder.m_tMediaMutex);	
 		break;
@@ -324,6 +332,7 @@ int Recorder_start(
 		memset(&sRecIf, 0 , sizeof(S_NM_RECORD_IF));
 
 		if(g_sRecorder.m_u32EachRecFileDuration == eNM_UNLIMIT_TIME){
+			//Checking storage free space is enough or not
 			if (g_sRecorder.m_u64CurFreeSpaceInByte < DEF_REC_RESERVE_STORE_SPACE)
 			{
 				eNMRet = eNM_ERRNO_SIZE;
@@ -334,6 +343,7 @@ int Recorder_start(
 
 //              printf("Free space in disk-%c %012"PRId64"\n", recorder_getdiskvolume()[0] ,g_sRecorder.m_u64CurFreeSpaceInByte);
 
+		//Get current media file name
         i32Ret = FileMgr_CreateNewFileName(DEF_RECORD_FILE_MGR_TYPE,
                                            DEF_RECORD_FILE_FOLDER,
                                            0,
@@ -350,6 +360,7 @@ int Recorder_start(
 
         printf("Recorded file name is %s.\n", g_sRecorder.m_sCurMediaAttr.szFileName);
 
+		//Check video-in pipe information
         for (i32PlanarPipeNo = 0; i32PlanarPipeNo < DEF_VIN_MAX_PIPES; i32PlanarPipeNo++)
         {
             psPipeInfo = VideoIn_GetPipeInfo(i32PlanarPipeNo);
@@ -369,31 +380,38 @@ int Recorder_start(
             goto exit_recorder_start;
         }
 
+		//Get audio-in information
         psAinInfo = AudioIn_GetInfo();
 
+		//Setup video fill context
         g_sRecorder.m_sRecCtx.sFillVideoCtx.eVideoType = eNM_CTX_VIDEO_YUV420P_MB;
         g_sRecorder.m_sRecCtx.sFillVideoCtx.u32Width = psPipeInfo->u32Width;
         g_sRecorder.m_sRecCtx.sFillVideoCtx.u32Height = psPipeInfo->u32Height;
         g_sRecorder.m_sRecCtx.sFillVideoCtx.u32FrameRate = psPipeInfo->u32FrameRate;
 
+		//Setup video media context
         g_sRecorder.m_sRecCtx.sMediaVideoCtx.eVideoType = eNM_CTX_VIDEO_H264;
         g_sRecorder.m_sRecCtx.sMediaVideoCtx.u32Width = psPipeInfo->u32Width;
         g_sRecorder.m_sRecCtx.sMediaVideoCtx.u32Height = psPipeInfo->u32Height;
         g_sRecorder.m_sRecCtx.sMediaVideoCtx.u32FrameRate = psPipeInfo->u32FrameRate;
 
-        g_sRecorder.m_sRecCtx.sFillAudioCtx.eAudioType = eNM_CTX_AUDIO_PCM_L16;
+		//Setup audio fill context
+		g_sRecorder.m_sRecCtx.sFillAudioCtx.eAudioType = eNM_CTX_AUDIO_PCM_L16;
         g_sRecorder.m_sRecCtx.sFillAudioCtx.u32SampleRate = psAinInfo->u32SampleRate;
         g_sRecorder.m_sRecCtx.sFillAudioCtx.u32Channel = psAinInfo->u32Channel;
 
-        g_sRecorder.m_sRecCtx.sMediaAudioCtx.eAudioType = eNM_CTX_AUDIO_AAC;
+		//Setup audio media context
+		g_sRecorder.m_sRecCtx.sMediaAudioCtx.eAudioType = eNM_CTX_AUDIO_AAC;
         g_sRecorder.m_sRecCtx.sMediaAudioCtx.u32SampleRate = psAinInfo->u32SampleRate;
         g_sRecorder.m_sRecCtx.sMediaAudioCtx.u32Channel = psAinInfo->u32Channel;
         g_sRecorder.m_sRecCtx.sMediaAudioCtx.u32BitRate = 64000;
 
+		//Setup video and audio fill callback
         sRecIf.pfnVideoFill = VideoIn_FillCB;
         sRecIf.pfnAudioFill = AudioIn_FillCB;
 
-        eNMRet = NMRecord_Open(g_sRecorder.m_sCurMediaAttr.szFileName,
+		//Open current media
+		eNMRet = NMRecord_Open(g_sRecorder.m_sCurMediaAttr.szFileName,
                                DEF_NM_MEDIA_FILE_TYPE,
                                g_sRecorder.m_u32EachRecFileDuration,
                                &g_sRecorder.m_sRecCtx,
@@ -407,9 +425,12 @@ int Recorder_start(
             goto exit_recorder_start;
         }
 
+		//Append current media file name to file manager
         FileMgr_AppendFileInfo(DEF_RECORD_FILE_MGR_TYPE, g_sRecorder.m_sCurMediaAttr.szFileName);
+		//Clean audio-in PCM buffer
         AudioIn_CleanPCMBuff();
 
+		//Start record
         eNMRet = NMRecord_Record(
                      &g_sRecorder.m_hRecord,
                      g_sRecorder.m_u32EachRecFileDuration,
@@ -485,6 +506,7 @@ void *worker_recorder(void *pvParameters)
         goto exit_worker_recorder;
 	}
 		
+	//Init video-in device
     i32Ret = VideoIn_DeviceInit();
     if (i32Ret != 0)
     {
@@ -492,6 +514,7 @@ void *worker_recorder(void *pvParameters)
         goto exit_worker_recorder;
     }
 
+	//Init audio-in device
     i32Ret = AudioIn_DeviceInit();
     if (i32Ret != 0)
     {
@@ -499,9 +522,11 @@ void *worker_recorder(void *pvParameters)
         goto exit_worker_recorder;
     }
 
+	//Create video-in and audio-in task
     xTaskCreate(VideoIn_TaskCreate, "VideoIn", configMINIMAL_STACK_SIZE, NULL, mainMAIN_TASK_PRIORITY, NULL);
     xTaskCreate(AudioIn_TaskCreate, "AudioIn", configMINIMAL_STACK_SIZE, NULL, mainMAIN_TASK_PRIORITY, NULL);
 
+	//Render is for video-in preview
     Render_Init();
 
 	uint8_t *pu8FrameData;
@@ -534,6 +559,7 @@ void *worker_recorder(void *pvParameters)
 		}
 
         if (g_sRecorder.m_eCurRecordingStatus == eNM_RECORD_STATUS_RECORDING){
+			//Checking storage free space is enough or not
 			if((g_sRecorder.m_u32EachRecFileDuration == eNM_UNLIMIT_TIME) && (Recorder_is_over_limitedsize())){
 				printf("No enough space to record. Stop recording.\n");
 				Recorder_stop();

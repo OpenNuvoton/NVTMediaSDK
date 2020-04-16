@@ -50,6 +50,7 @@ static void InitVPOST(uint8_t* pu8FrameBuffer)
 	PFN_DRVVPOST_INT_CALLBACK fun_ptr;
 	LCDFORMATEX lcdFormat;	
 
+	//Set source format to YUV422
 	lcdFormat.ucVASrcFormat = DRVVPOST_FRAME_YCBYCR;//DRVVPOST_FRAME_YCBYCR;  //DRVVPOST_FRAME_RGB565;
 	lcdFormat.nScreenWidth = LCD_PANEL_WIDTH;
 	lcdFormat.nScreenHeight = LCD_PANEL_HEIGHT;	  
@@ -87,6 +88,7 @@ Render_SetFrameBuffAddr(
 	uint8_t *pu8FBAddr
 )
 {
+	//Set VPOST frame buffer address
 	s_pu8CurFBAddr = pu8FBAddr;
 }
 

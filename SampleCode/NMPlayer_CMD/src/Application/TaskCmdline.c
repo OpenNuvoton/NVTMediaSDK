@@ -70,6 +70,7 @@ static S_PAGE_HANDLE s_PlayPage = {
 
 static S_PLAY_PAGE_PRIV s_PlayPagePriv;
 
+//Init play page and start play media
 static int PlayPage_Init(void *pvArgv)
 {
 	char *szFileName = (char *)pvArgv;
@@ -91,6 +92,7 @@ static int PlayPage_Init(void *pvArgv)
 	return 0;
 }
 
+//Read seek time from stdin
 static int32_t ReadSeekTime(void)
 {
 	char szSeekTime[10];
@@ -136,6 +138,7 @@ static struct s_page_handle* PlayPage_Action(
 	{
 		case 's':
 		{
+			//Set seek time
 			int32_t i32SeekTime;
 			Player_pause();
 			printf("Please key-in seek time (ms):");
@@ -147,6 +150,7 @@ static struct s_page_handle* PlayPage_Action(
 		break;
 		case 'p':
 		{
+			//Pause/resume play media
 			E_NM_PLAY_STATUS ePlayStatus;
 
 			ePlayStatus = Player_status();
@@ -163,6 +167,7 @@ static struct s_page_handle* PlayPage_Action(
 		break;
 		case 'q':
 		{
+			//Quit and return main page
 			S_PAGE_HANDLE *psPrevPage;
 			Player_stop();
 			psPrevPage = s_PlayPage.psPrevPage;
@@ -216,11 +221,14 @@ static void MainPage_Info(void){
 		printf("No media file on %s \n", DEF_PATH_MEDIA_FOLDER);
 }
 
+//Init main page
 static int MainPage_Init(void *pvArgv)
 {
 	S_FILELIST *psMediaFileList;
 	
+	//Create media file list
 	filelist_create(DEF_PATH_MEDIA_FOLDER);
+	//Get media file list
 	psMediaFileList = filelist_getInstance();
 	
 	s_MainPagePriv.i32MediaFiles = psMediaFileList->m_i32UsedNum;
@@ -243,6 +251,7 @@ static struct s_page_handle* MainPage_Action(
 		{
 			int32_t i32Ret;
 			
+			//enter play page
 			i32Ret = PlayPage_Init((void *)filelist_getFileName(psPriv->i32CurMediaIdx));
 			if(i32Ret == 0){
 				s_PlayPage.psPrevPage = &s_MainPage;
@@ -252,6 +261,7 @@ static struct s_page_handle* MainPage_Action(
 		break;
 		case 'n':
 		{
+			//select media file
 			if(psPriv->i32CurMediaIdx >= (psPriv->i32MediaFiles - 1))
 				psPriv->i32CurMediaIdx = 0;
 			else
@@ -269,6 +279,8 @@ static struct s_page_handle* MainPage_Action(
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Commandline worker thread
 void *worker_cmdline(void *pvArgs)
 {
 	S_PAGE_HANDLE *psCurPage = &s_MainPage;
@@ -278,8 +290,11 @@ void *worker_cmdline(void *pvArgs)
 	
 	//Read key from stdin and do action
 	while(psCurPage){
+		//Print page information
 		psCurPage->pfnPageInfo();
-		i8Key = sysGetChar();		//FIXME: sysGetChar() is wait busy function, maybe write another getchar() for thread yelid 
+		//Get character from stdin
+		i8Key = sysGetChar();
+		//Do action
 		psCurPage = psCurPage->pfnPageAction(i8Key);
 	}
 

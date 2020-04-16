@@ -572,6 +572,7 @@ void VideoIn_Port1InterruptHandler(
 	}
 }
 
+//Open video-in device
 static int
 OpenVinDev(
 	S_VIN_PORT_OP *psPortOP
@@ -614,6 +615,7 @@ OpenVinDev(
 	if(psPortOP->psSnrIf == NULL)
 		return -1;
 
+	//Setup planar and packet pipe attribute
 	if(u32PortNo == 0){
 		psPortOP->sSnrAttr.u32PlanarWidth = VIN_CONFIG_PORT0_PLANAR_WIDTH;
 		psPortOP->sSnrAttr.u32PlanarHeight = VIN_CONFIG_PORT0_PLANAR_HEIGHT;
@@ -905,6 +907,7 @@ VideoInDeviceInit(
 	return 0;
 }
 
+//Video-In task
 static void VinFrameLoop(
 	S_VIN_PORT_OP	*psPortOP
 )
@@ -919,7 +922,9 @@ static void VinFrameLoop(
 	uint32_t u32Frames = 0;
 
 	while(1){
+		//Wait Video-In ISR semaphore
 		xSemaphoreTake(psPortOP->tVinISRSem, portMAX_DELAY);
+		//Lock frame index mutex
 		xSemaphoreTake(psPortOP->tFrameIndexMutex, portMAX_DELAY);
 
 		for(i = 0; i < i32MaxPlanarFrameCnt; i ++){
@@ -952,6 +957,7 @@ static void VinFrameLoop(
 			}				
 		}
 
+		//Unlock frame index mutex
 		xSemaphoreGive(psPortOP->tFrameIndexMutex);
 		
 		u64CurTime = NMUtil_GetTimeMilliSec();
@@ -963,7 +969,7 @@ static void VinFrameLoop(
 		psPortOP->sVinDev.SetOperationMode(TRUE);
 		psPortOP->sVinDev.SetShadowRegister();
 #endif
-
+		//Calculate FPS
 		if(u64CalFPSTime >= 5000){
 			uint32_t u32NewFPS;
 			

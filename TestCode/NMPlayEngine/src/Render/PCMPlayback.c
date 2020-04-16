@@ -94,6 +94,7 @@ DACIsrCallback(
 	return 0;
 }
 
+//Punch PCM data to PCM ISR buffer
 static void PCMPuncherTask(
 	void *pvArg
 )
@@ -105,6 +106,7 @@ static void PCMPuncherTask(
 	spuIoctl(SPU_IOCTL_SET_VOLUME, s_i32SPUVolume, s_i32SPUVolume);	
 	while(1){
 
+		//Wait DAC ISR semphore
 		if(xSemaphoreTake(s_tPCMPuncherSem, portMAX_DELAY) == pdFALSE){
 			break;
 		}
@@ -113,21 +115,24 @@ static void PCMPuncherTask(
 		
 		if(bEmpty == TRUE){
 			if((psPCMBufMgr->u32WriteIdx - psPCMBufMgr->u32ReadIdx) < i32HalfFrag){
+				//PCM data still not enough
 				xSemaphoreGive(psPCMBufMgr->tBufMutex);
 				vTaskDelay(5 / portTICK_RATE_MS);	
 				continue;
 			}
 			else{
+				//Calcute PCM buffer empty status
 				uint32_t u32AverageEmptyTime;
 
 				spuIoctl(SPU_IOCTL_SET_VOLUME, s_i32SPUVolume, s_i32SPUVolume);		
 				s_u32EmptyAudioCount ++;
 				s_u64EmptyAudioTotalTime += NMUtil_GetTimeMilliSec() - s_u64EmptyAudioStartTime;
 				u32AverageEmptyTime = s_u64EmptyAudioTotalTime / s_u32EmptyAudioCount;
-				NMLOG_DEBUG("AAAAAAAAAAAAAA Audio empty count %d, average time %d \n", s_u32EmptyAudioCount, u32AverageEmptyTime);				
+				NMLOG_DEBUG("Audio empty count %d, average time %d \n", s_u32EmptyAudioCount, u32AverageEmptyTime);				
 			}
 		}
 		else{
+			//Detect PCM data empty or not
 			if((psPCMBufMgr->u32WriteIdx - psPCMBufMgr->u32ReadIdx) < i32HalfFrag){
 				xSemaphoreGive(psPCMBufMgr->tBufMutex);
 				NMLOG_INFO("PCM buffer is empty\n");
@@ -139,6 +144,7 @@ static void PCMPuncherTask(
 			}
 		}
 		
+		//PCM data is enough to put PCM ISR buffer
 		bEmpty = FALSE;	
 		memcpy(s_pu8ISRPcmBuf, psPCMBufMgr->pu8Buf + psPCMBufMgr->u32ReadIdx, i32HalfFrag);
 		psPCMBufMgr->u32ReadIdx += i32HalfFrag;
@@ -169,11 +175,14 @@ OpenDAC(
 		spuIoctl(SPU_IOCTL_SET_STEREO, NULL, NULL);	
 	}
 
+	//SPU fragment size ~250ms 
 	u32FragmentSize = i32SampleRate / 4 * i32Channel;
+	//SPU fragment size alignment to 4096
 	u32FragmentSize = u32FragmentSize & (~(4096 -1));
 	if(u32FragmentSize == 0)
 		u32FragmentSize = 4096;
 
+	//Set SPU fragment size
 	spuIoctl(SPU_IOCTL_SET_FRAG_SIZE, (uint32_t) &u32FragmentSize, NULL);	
 
 	spuIoctl(SPU_IOCTL_GET_FRAG_SIZE, (uint32_t) &u32FragmentSize, NULL);	
@@ -204,6 +213,7 @@ StartPlayDAC(
 
 	memset(pu8SilentPCM, 0x0, s_u32DACFragmentSize);
 
+	//SPU enable and pass a silent PCM data to SPU
 	spuStartPlay(DACIsrCallback, pu8SilentPCM);
 
 #if defined(CTRL_PA_PIN)
@@ -263,6 +273,7 @@ PCMPlayback_Start(
 	memset(&s_sPCMBufMgr, 0, sizeof(S_PCM_BUF_MGR));
 	s_hPunckerTaskHandle = NULL;
 	
+	//Create puncher semaphore
 	s_tPCMPuncherSem = xSemaphoreCreateBinary();
 	if(s_tPCMPuncherSem == NULL){
 		i32Ret = -2;
@@ -272,7 +283,7 @@ PCMPlayback_Start(
 	//Open DAC
 	s_u32DACFragmentSize = OpenDAC(u32SampleRate, u32Channel);
 
-	//Allocate ISR PCM buffer
+	//Allocate PCM ISR buffer
 	s_pu8ISRPcmBuf = malloc(s_u32DACFragmentSize / 2);
 	if(s_pu8ISRPcmBuf == NULL){
 		i32Ret = -3;
@@ -281,6 +292,7 @@ PCMPlayback_Start(
 
 	memset(s_pu8ISRPcmBuf, 0, (s_u32DACFragmentSize / 2));
 
+	//Allocate PCM buffer for PCM buffer manage
 	s_sPCMBufMgr.pu8Buf = malloc(s_u32DACFragmentSize * 4);	
 	if(s_sPCMBufMgr.pu8Buf == NULL){
 		i32Ret = -4;
@@ -302,7 +314,7 @@ PCMPlayback_Start(
 		goto PCMPlayback_Start_Fail;		
 	}
 
-	//Create task for http client			
+	//Create task for PCM puncher task			
 	xTaskCreate( PCMPuncherTask, "pcm_puncker", PCM_TASK_STACK_MIDDLE, &s_sPCMBufMgr, PCM_TASK_PRIORITY_MIDDLE,  &s_hPunckerTaskHandle);
 	if(s_hPunckerTaskHandle == NULL){
 		i32Ret = -6;

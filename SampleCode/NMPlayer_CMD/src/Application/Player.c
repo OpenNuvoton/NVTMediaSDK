@@ -151,6 +151,7 @@ int Player_start(
         g_sPlayer.m_OpenRes = NULL;
         g_sPlayer.m_hPlay = (HPLAY)eNM_INVALID_HANDLE;
 
+		//Open media
         eNMRet = NMPlay_Open((char *)szFileName, &g_sPlayer.m_sPlayIF, &g_sPlayer.m_sPlayCtx, &g_sPlayer.m_sPlayInfo, &g_sPlayer.m_OpenRes);
         if (eNMRet != eNM_ERRNO_NONE)
         {
@@ -158,8 +159,10 @@ int Player_start(
             goto exit_player_start;
         }
 
+		//Show media information
         dump_media_info();
 
+		//Setup audio and video flush callback
         if (g_sPlayer.m_sPlayIF.psVideoCodecIF)
             g_sPlayer.m_sPlayIF.pfnVideoFlush = UpdateInfo_VideoFlush;
 
@@ -168,16 +171,19 @@ int Player_start(
         else if (g_sPlayer.m_sPlayIF.psAudioCodecIF)
             g_sPlayer.m_sPlayIF.pfnAudioFlush = Render_AudioFlush;
 
+		//Setup video flush context
         g_sPlayer.m_sPlayCtx.sFlushVideoCtx.eVideoType = eNM_CTX_VIDEO_YUV422;
         g_sPlayer.m_sPlayCtx.sFlushVideoCtx.u32Width = LCD_PANEL_WIDTH;
         g_sPlayer.m_sPlayCtx.sFlushVideoCtx.u32Height = LCD_PANEL_HEIGHT;
 
+		//Setup audio flush context
         g_sPlayer.m_sPlayCtx.sFlushAudioCtx.eAudioType = eNM_CTX_AUDIO_PCM_L16;
         g_sPlayer.m_sPlayCtx.sFlushAudioCtx.u32SampleRate = g_sPlayer.m_sPlayCtx.sMediaAudioCtx.u32SampleRate;
         g_sPlayer.m_sPlayCtx.sFlushAudioCtx.u32Channel = g_sPlayer.m_sPlayCtx.sMediaAudioCtx.u32Channel;
         g_sPlayer.m_sPlayCtx.sFlushAudioCtx.u32SamplePerBlock = g_sPlayer.m_sPlayCtx.sMediaAudioCtx.u32SamplePerBlock;
         g_sPlayer.m_sPlayCtx.sFlushAudioCtx.pvParamSet = g_sPlayer.m_sPlayCtx.sMediaAudioCtx.pvParamSet;
 
+		//Init display
         i32Ret = Render_Init(g_sPlayer.m_sPlayCtx.sFlushAudioCtx.u32SampleRate, g_sPlayer.m_sPlayCtx.sFlushAudioCtx.u32Channel);
         if (i32Ret != 0)
         {
@@ -196,6 +202,7 @@ int Player_stop(void)
 {
     if (g_sPlayer.m_hPlay != (HPLAY)eNM_INVALID_HANDLE)
     {
+		//Close media
         NMPlay_Close(g_sPlayer.m_hPlay, &g_sPlayer.m_OpenRes);
         Render_Final();
     }
@@ -218,7 +225,7 @@ E_NM_ERRNO Player_pause(void)
 
 int Player_play(void)
 {
-    // play
+    // play media
     E_NM_ERRNO eNMErr = NMPlay_Play(&g_sPlayer.m_hPlay, &g_sPlayer.m_sPlayIF, &g_sPlayer.m_sPlayCtx, DEF_NM_ENGINE_BLOCKING);
     if (eNMErr != eNM_ERRNO_NONE)
     {

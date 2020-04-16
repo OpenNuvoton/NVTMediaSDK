@@ -107,6 +107,7 @@ DACIsrCallback(
     return 0;
 }
 
+//Punch PCM data to PCM ISR buffer
 static void PCMPuncherTask(
     void *pvArg
 )
@@ -119,6 +120,7 @@ static void PCMPuncherTask(
     while (1)
     {
 
+		//Wait DAC ISR semphore
         if (xSemaphoreTake(s_tPCMPuncherSem, portMAX_DELAY) == pdFALSE)
         {
             break;
@@ -130,12 +132,14 @@ static void PCMPuncherTask(
         {
             if ((psPCMBufMgr->u32WriteIdx - psPCMBufMgr->u32ReadIdx) < i32HalfFrag)
             {
+				//PCM data still not enough
                 xSemaphoreGive(psPCMBufMgr->tBufMutex);
                 vTaskDelay(5 / portTICK_RATE_MS);
                 continue;
             }
             else
             {
+				//Calcute PCM buffer empty status
                 uint32_t u32AverageEmptyTime;
 
                 spuIoctl(SPU_IOCTL_SET_VOLUME, s_i32SPUVolume, s_i32SPUVolume);
@@ -147,6 +151,7 @@ static void PCMPuncherTask(
         }
         else
         {
+			//Detect PCM data empty or not
             if ((psPCMBufMgr->u32WriteIdx - psPCMBufMgr->u32ReadIdx) < i32HalfFrag)
             {
                 xSemaphoreGive(psPCMBufMgr->tBufMutex);
@@ -159,6 +164,7 @@ static void PCMPuncherTask(
             }
         }
 
+		//PCM data is enough to put PCM ISR buffer
         bEmpty = FALSE;
         memcpy(s_pu8ISRPcmBuf, psPCMBufMgr->pu8Buf + psPCMBufMgr->u32ReadIdx, i32HalfFrag);
         psPCMBufMgr->u32ReadIdx += i32HalfFrag;
@@ -192,11 +198,14 @@ OpenDAC(
     }
 
 
+	//SPU fragment size ~250ms 
     u32FragmentSize = i32SampleRate / 4 * i32Channel;
+	//SPU fragment size alignment to 4096
     u32FragmentSize = u32FragmentSize & (~(4096 - 1));
     if (u32FragmentSize == 0)
         u32FragmentSize = 4096;
-    //  u32FragmentSize = 8192;
+
+	//Set SPU fragment size
     spuIoctl(SPU_IOCTL_SET_FRAG_SIZE, (uint32_t) &u32FragmentSize, 0);
 
     spuIoctl(SPU_IOCTL_GET_FRAG_SIZE, (uint32_t) &u32FragmentSize, 0);
@@ -227,6 +236,7 @@ StartPlayDAC(
 
     memset(pu8SilentPCM, 0x0, s_u32DACFragmentSize);
 
+	//SPU enable and pass a silent PCM data to SPU
     spuStartPlay(DACIsrCallback, pu8SilentPCM);
 
 #if defined(CTRL_PA_PIN)
@@ -288,6 +298,7 @@ PCMPlayback_Start(
     memset(&s_sPCMBufMgr, 0, sizeof(S_PCM_BUF_MGR));
     s_hPunckerTaskHandle = NULL;
 
+	//Create puncher semaphore
     s_tPCMPuncherSem = xSemaphoreCreateBinary();
     if (s_tPCMPuncherSem == NULL)
     {
@@ -315,6 +326,7 @@ PCMPlayback_Start(
         goto PCMPlayback_Start_Fail;
     }
 
+	//Allocate PCM buffer for PCM buffer manage
     s_sPCMBufMgr.u32Size = s_u32DACFragmentSize * 4;
     s_sPCMBufMgr.u32WriteIdx = 0;
     s_sPCMBufMgr.u32ReadIdx = 0;

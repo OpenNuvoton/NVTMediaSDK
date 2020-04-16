@@ -122,6 +122,7 @@ OpenAinDev(
 	PFN_AUR_CALLBACK pfnOldCallback;
 	int32_t i32Idx;
 	
+	//Sample rate support list
 	uint32_t au32ArraySampleRate[]= {							
 							eAUR_SPS_48000, 						
 							eAUR_SPS_44100, eAUR_SPS_32000, eAUR_SPS_24000, eAUR_SPS_22050,
@@ -132,6 +133,7 @@ OpenAinDev(
 
 	uint32_t u32MaxSupport = sizeof(au32ArraySampleRate)/sizeof(au32ArraySampleRate[0]);
 
+	//Checking sample rate in support list or not
 	for(i32Idx=0; i32Idx<u32MaxSupport ; i32Idx=i32Idx+1){
 		if(psAinInfo->u32SampleRate == au32ArraySampleRate[i32Idx])
 			break;
@@ -141,6 +143,7 @@ OpenAinDev(
 		}
 	}
 
+	//Open audio record device
 	DrvAUR_Open(eMicType, TRUE);
 	DrvAUR_InstallCallback(AudioRecordSampleDone, &pfnOldCallback);	
 
@@ -216,6 +219,7 @@ int32_t AudioInDeviceInit(
 	return 0;
 }
 
+//Audio-In task.
 static void AinFrameLoop(
 	S_AIN_CTRL *psAinCtrl
 )
@@ -227,7 +231,10 @@ static void AinFrameLoop(
 	DrvEDMA_CHEnablelTransfer((E_DRVEDMA_CHANNEL_INDEX)psAinCtrl->u32EDMAChannel);
 
 	while(1){
+		//Wait audio-in ISR semaphore
 		xSemaphoreTake(psAinCtrl->tAinISRSem, portMAX_DELAY);
+
+		//lock PCM index mutex
 		xSemaphoreTake(psAinCtrl->tPCMIndexMutex, portMAX_DELAY);
 	
 		psAinCtrl->u64LastFrameTimestamp = NMUtil_GetTimeMilliSec();
@@ -256,6 +263,7 @@ static void AinFrameLoop(
 		psAinCtrl->u32PCMInIdx = psAinCtrl->u32PCMInIdx + psAinCtrl->u32PCMFragBufSize;
 		s_bIsEDMABufferDone = 0;
 
+		//unlock PCM index mutex
 		xSemaphoreGive(psAinCtrl->tPCMIndexMutex);		
 	}
 }
@@ -277,6 +285,7 @@ void AudioIn_TaskCreate(
 	vTaskDelete(NULL);
 }
 
+//Read one block audio data
 BOOL
 AudioIn_ReadFrameData(
 	uint32_t u32ReadSamples,
@@ -315,15 +324,16 @@ AudioIn_GetInfo(void)
 	return &s_sAinCtrl.sAinInfo;
 }
 
+//Clean all PCM data
 void
 AudioIn_CleanPCMBuff(void)
 {
-		xSemaphoreTake(s_sAinCtrl.tPCMIndexMutex, portMAX_DELAY);
+	xSemaphoreTake(s_sAinCtrl.tPCMIndexMutex, portMAX_DELAY);
 
-		s_sAinCtrl.u32PCMInIdx = 0;
-		s_sAinCtrl.u32PCMOutIdx = 0;
+	s_sAinCtrl.u32PCMInIdx = 0;
+	s_sAinCtrl.u32PCMOutIdx = 0;
 
-		xSemaphoreGive(s_sAinCtrl.tPCMIndexMutex);
+	xSemaphoreGive(s_sAinCtrl.tPCMIndexMutex);
 }
 
 
