@@ -187,7 +187,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     								
@@ -473,7 +473,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     								
@@ -595,6 +595,8 @@
             		
         </configuration>
         		
+        <configuration configurationName="N9H26K5_SD_WVGA"/>
+        		
         <configuration configurationName="N9H26K5_SD_480x272"/>
         		
         <configuration configurationName="N9H26K5_SD_800x480"/>
@@ -606,6 +608,8 @@
             <resource resourceType="PROJECT" workspacePath="/GUIDemo"/>
             		
         </configuration>
+        		
+        <configuration configurationName="N9H26K5_SD_QVGA"/>
         		
         <configuration configurationName="N9H26K5_800x480"/>
         		

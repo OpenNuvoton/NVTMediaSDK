@@ -544,11 +544,6 @@
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_VPE.lib</FilePath>
             </File>
             <File>
-              <FileName>N9H26_H264Codec.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_H264Codec.lib</FilePath>
-            </File>
-            <File>
               <FileName>N9H26_SPU.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_SPU.lib</FilePath>
@@ -557,6 +552,11 @@
               <FileName>N9H26_NVTFAT_FREERTOS_1B.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS_1B.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_H264CodecFreeRTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_H264CodecFreeRTOS.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -1100,11 +1100,6 @@
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_VPE.lib</FilePath>
             </File>
             <File>
-              <FileName>N9H26_H264Codec.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_H264Codec.lib</FilePath>
-            </File>
-            <File>
               <FileName>N9H26_SPU.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\BSP\N9H26_emWin_NonOS\BSP\Library\IPLib\N9H26_SPU.lib</FilePath>
@@ -1113,6 +1108,11 @@
               <FileName>N9H26_NVTFAT_FREERTOS_1B.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_NVTFAT_FREERTOS_1B.lib</FilePath>
+            </File>
+            <File>
+              <FileName>N9H26_H264CodecFreeRTOS.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\PrebuildLib\N9H26\ARMCC\N9H26_H264CodecFreeRTOS.lib</FilePath>
             </File>
           </Files>
         </Group>

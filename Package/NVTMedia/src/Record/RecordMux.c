@@ -54,6 +54,7 @@ typedef struct{
 typedef struct {
 	E_MUX_THREAD_STATE eMuxThreadState;
 
+	pthread_mutex_t tCmdMutex;
 	E_MUX_IOCTL_CODE	eCmdCode;
 	void *pvCmdArgv;
 	E_NM_ERRNO eCmdRet;
@@ -75,10 +76,22 @@ RunMuxCmd(
 	S_RECORD_MUX_RES *psMuxRes
 )
 {
+	int i32SemValue;
+
 	S_MUX_PRIV *psMuxPriv = (S_MUX_PRIV *)psMuxRes->pvMuxPriv;
 
-	if(psMuxPriv->eCmdCode == eMUX_IOCTL_NONE)
+	pthread_mutex_lock(&psMuxPriv->tCmdMutex);
+
+	if(psMuxPriv->eCmdCode == eMUX_IOCTL_NONE){
+		sem_getvalue(&psMuxRes->tMuxCtrlSem, &i32SemValue);
+		if(i32SemValue < 0){
+			printf("%s, %s: Warning! post semaphore again! \n", __FILE__, __FUNCTION__);
+			sem_post(&psMuxRes->tMuxCtrlSem);
+		}
+		
+		pthread_mutex_unlock(&psMuxPriv->tCmdMutex);
 		return 0;
+	}
 
 	psMuxPriv->eCmdRet = eNM_ERRNO_NONE;
 
@@ -127,7 +140,7 @@ RunMuxCmd(
 	
 	psMuxPriv->eCmdCode = eMUX_IOCTL_NONE;
 
-	int i32SemValue;
+	pthread_mutex_unlock(&psMuxPriv->tCmdMutex);
 	
 	sem_getvalue(&psMuxRes->tMuxCtrlSem,	&i32SemValue);
 
@@ -493,6 +506,12 @@ InitMuxPriv(
 		goto InitMuxPriv_fail;
 	}
 
+	//Init command mutex
+	if(pthread_mutex_init(&psMuxPriv->tCmdMutex, NULL) != 0){
+		eNMRet = eNM_ERRNO_OS;
+		goto InitMuxPriv_fail;
+	}
+	
 	psMuxPriv->eCmdCode = eMUX_IOCTL_NONE;	
 	psMuxPriv->pvCmdArgv = NULL;	
 	psMuxPriv->eMuxThreadState = eMUX_THREAD_STATE_INIT;
@@ -506,8 +525,10 @@ InitMuxPriv(
 	return eNM_ERRNO_NONE;
 InitMuxPriv_fail:
 	
-	if(psMuxPriv)
+	if(psMuxPriv){
+		pthread_mutex_destroy(&psMuxPriv->tCmdMutex);		
 		free(psMuxPriv);
+	}
 	
 	return eNMRet;	
 }
@@ -523,6 +544,8 @@ FinialMuxPriv(
 		return;
 
 	psMuxPriv = (S_MUX_PRIV *)psMuxRes->pvMuxPriv;
+
+	pthread_mutex_destroy(&psMuxPriv->tCmdMutex);		
 	free(psMuxPriv);
 	psMuxRes->pvMuxPriv = NULL;
 }
@@ -548,6 +571,7 @@ MuxThread_IOCTL(
 		return eNM_ERRNO_NONE;
 	
 	pthread_mutex_lock(&psMuxRes->tMuxCtrlMutex);
+	pthread_mutex_lock(&psMuxPriv->tCmdMutex);
 
 	//Argument size check
 	switch (eCmdCode){
@@ -583,10 +607,14 @@ MuxThread_IOCTL(
 		psMuxPriv->eCmdCode = eCmdCode;
 		psMuxPriv->pvCmdArgv = pvCmdArgv;		
 
+		pthread_mutex_unlock(&psMuxPriv->tCmdMutex);
 		if(bBlocking){
 			sem_wait(&psMuxRes->tMuxCtrlSem);
 			eNMRet = psMuxPriv->eCmdRet;
 		}
+	}
+	else{
+		pthread_mutex_unlock(&psMuxPriv->tCmdMutex);
 	}
 	
 	pthread_mutex_unlock(&psMuxRes->tMuxCtrlMutex);
@@ -646,8 +674,10 @@ RecordMux_ThreadDestroy(
 	void *pvJoin;
 
 	if(psMuxRes->tMuxThread){
-			MuxThread_IOCTL(psMuxRes, eMUX_IOCTL_SET_STATE, (void *)eMuxThreadState, sizeof(E_MUX_THREAD_STATE), true);
+			MuxThread_IOCTL(psMuxRes, eMUX_IOCTL_SET_STATE, (void *)eMuxThreadState, sizeof(E_MUX_THREAD_STATE), false);
+			printf("DDDDDDDD RecordMux_ThreadDestroy 0 \n");
 			pthread_join(psMuxRes->tMuxThread, &pvJoin);
+			printf("DDDDDDDD RecordMux_ThreadDestroy 1 \n");
 			psMuxRes->tMuxThread = NULL;
 	}
 }

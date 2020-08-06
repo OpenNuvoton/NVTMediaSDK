@@ -53,6 +53,7 @@ typedef struct {
 	E_DECODE_THREAD_STATE eDecThreadState;
 	E_DECODE_IOCTL_CODE	eCmdCode;
 	void *pvCmdArgv;
+	pthread_mutex_t tCmdMutex;
 	S_DECODE_FRAME asDecodeFrame[MAX_DECODED_FRAMES];
 	
 } S_VIDEO_DEC_PRIV;
@@ -61,6 +62,7 @@ typedef struct {
 	E_DECODE_THREAD_STATE eDecThreadState;
 	E_DECODE_IOCTL_CODE	eCmdCode;
 	void *pvCmdArgv;
+	pthread_mutex_t tCmdMutex;
 	S_DECODE_FRAME asDecodeFrame[MAX_DECODED_FRAMES];
 	
 } S_AUDIO_DEC_PRIV;
@@ -72,8 +74,19 @@ RunVideoDecCmd(
 )
 {
 	S_VIDEO_DEC_PRIV *psVideoDecPriv = (S_VIDEO_DEC_PRIV *)psVideoDecodeRes->pvVideoDecPriv;
+	int i32SemValue;
+
+	pthread_mutex_lock(&psVideoDecPriv->tCmdMutex);
 
 	if(psVideoDecPriv->eCmdCode == eDECODE_IOCTL_NONE){
+
+		sem_getvalue(&psVideoDecodeRes->tVideoDecodeCtrlSem, &i32SemValue);
+		if(i32SemValue < 0){
+			printf("%s, %s: Warning! post semaphore again! \n", __FILE__, __FUNCTION__);
+			sem_post(&psVideoDecodeRes->tVideoDecodeCtrlSem);
+		}
+			
+		pthread_mutex_unlock(&psVideoDecPriv->tCmdMutex);
 		return 0;
 	}
 
@@ -93,8 +106,7 @@ RunVideoDecCmd(
 	}
 	
 	psVideoDecPriv->eCmdCode = eDECODE_IOCTL_NONE;
-
-	int i32SemValue;
+	pthread_mutex_unlock(&psVideoDecPriv->tCmdMutex);
 	
 	sem_getvalue(&psVideoDecodeRes->tVideoDecodeCtrlSem,	&i32SemValue);
 
@@ -113,9 +125,20 @@ RunAudioDecCmd(
 	S_PLAY_AUDIO_DECODE_RES *psAudioDecodeRes
 )
 {
+	int i32SemValue;
 	S_AUDIO_DEC_PRIV *psAudioDecPriv = (S_AUDIO_DEC_PRIV *)psAudioDecodeRes->pvAudioDecPriv;
 
+	pthread_mutex_lock(&psAudioDecPriv->tCmdMutex);
+
 	if(psAudioDecPriv->eCmdCode == eDECODE_IOCTL_NONE){
+
+		sem_getvalue(&psAudioDecodeRes->tAudioDecodeCtrlSem, &i32SemValue);
+		if(i32SemValue < 0){
+			printf("%s, %s: Warning! post semaphore again! \n", __FILE__, __FUNCTION__);
+			sem_post(&psAudioDecodeRes->tAudioDecodeCtrlSem);
+		}
+			
+		pthread_mutex_unlock(&psAudioDecPriv->tCmdMutex);
 		return 0;
 	}
 
@@ -134,9 +157,8 @@ RunAudioDecCmd(
 		break;
 	}
 	
-	psAudioDecPriv->eCmdCode = eDECODE_IOCTL_NONE;
-
-	int i32SemValue;
+	psAudioDecPriv->eCmdCode = eDECODE_IOCTL_NONE;	
+	pthread_mutex_unlock(&psAudioDecPriv->tCmdMutex);
 	
 	sem_getvalue(&psAudioDecodeRes->tAudioDecodeCtrlSem,	&i32SemValue);
 
@@ -338,6 +360,12 @@ InitVideoDecPriv(
 		eNMRet = eNM_ERRNO_MALLOC;
 		goto InitVideoDecPriv_fail;
 	}
+
+	//Init command mutex
+	if(pthread_mutex_init(&psVideoDecPriv->tCmdMutex, NULL) != 0){
+		eNMRet = eNM_ERRNO_OS;
+		goto InitVideoDecPriv_fail;
+	}
 	
 	u32FlushImageDataSize = psVideoDecodeRes->sFlushVideoCtx.u32Width * psVideoDecodeRes->sFlushVideoCtx.u32Height * 2;
 	
@@ -370,8 +398,10 @@ InitVideoDecPriv_fail:
 		}
 	}
 		
-	if(psVideoDecPriv)
+	if(psVideoDecPriv){
+		pthread_mutex_destroy(&psVideoDecPriv->tCmdMutex);
 		free(psVideoDecPriv);
+	}
 	
 	return eNMRet;
 }
@@ -396,6 +426,7 @@ FinialVideoDecPriv(
 		}
 	}
 	
+	pthread_mutex_destroy(&psVideoDecPriv->tCmdMutex);
 	free(psVideoDecPriv);
 	psVideoDecodeRes->pvVideoDecPriv = NULL;
 }
@@ -422,7 +453,13 @@ InitAudioDecPriv(
 		eNMRet = eNM_ERRNO_MALLOC;
 		goto InitAudioDecPriv_fail;
 	}
-	
+
+	//Init command mutex
+	if(pthread_mutex_init(&psAudioDecPriv->tCmdMutex, NULL) != 0){
+		eNMRet = eNM_ERRNO_OS;
+		goto InitAudioDecPriv_fail;
+	}
+
 	u32FlushFrameSize = psAudioDecodeRes->sFlushAudioCtx.u32SampleRate * psAudioDecodeRes->sFlushAudioCtx.u32Channel * 2;
 
 	for(i = 0; i < MAX_DECODED_FRAMES; i ++){
@@ -453,9 +490,11 @@ InitAudioDecPriv_fail:
 		}
 	}
 	
-	if(psAudioDecPriv)
+	if(psAudioDecPriv){
+		pthread_mutex_destroy(&psAudioDecPriv->tCmdMutex);
 		free(psAudioDecPriv);
-	
+	}
+		
 	return eNMRet;
 }
 
@@ -480,6 +519,7 @@ FinialAudioDecPriv(
 	}
 
 	
+	pthread_mutex_destroy(&psAudioDecPriv->tCmdMutex);
 	free(psAudioDecPriv);
 	psAudioDecodeRes->pvAudioDecPriv = NULL;
 }
@@ -504,6 +544,7 @@ VideoDecThread_IOCTL(
 		return 0;
 	
 	pthread_mutex_lock(&psVideoDecodeRes->tVideoDecodeCtrlMutex);
+	pthread_mutex_lock(&psVideoDecPriv->tCmdMutex);
 
 	//Argument size check
 	switch (eCmdCode){
@@ -526,11 +567,15 @@ VideoDecThread_IOCTL(
 	if(i32Ret == 0){
 		psVideoDecPriv->pvCmdArgv = pvCmdArgv;		
 		psVideoDecPriv->eCmdCode = eCmdCode;
+		pthread_mutex_unlock(&psVideoDecPriv->tCmdMutex);
 
 		if(bBlocking)
 			sem_wait(&psVideoDecodeRes->tVideoDecodeCtrlSem);
 	}
-	
+	else{
+		pthread_mutex_unlock(&psVideoDecPriv->tCmdMutex);
+	}
+			
 	pthread_mutex_unlock(&psVideoDecodeRes->tVideoDecodeCtrlMutex);
 	return i32Ret;
 }
@@ -555,6 +600,7 @@ AudioDecThread_IOCTL(
 		return 0;
 	
 	pthread_mutex_lock(&psAudioDecodeRes->tAudioDecodeCtrlMutex);
+	pthread_mutex_lock(&psAudioDecPriv->tCmdMutex);
 
 	//Argument size check
 	switch (eCmdCode){
@@ -577,9 +623,13 @@ AudioDecThread_IOCTL(
 	if(i32Ret == 0){
 		psAudioDecPriv->eCmdCode = eCmdCode;
 		psAudioDecPriv->pvCmdArgv = pvCmdArgv;		
+		pthread_mutex_unlock(&psAudioDecPriv->tCmdMutex);
 
 		if(bBlocking)
 			sem_wait(&psAudioDecodeRes->tAudioDecodeCtrlSem);
+	}
+	else{
+		pthread_mutex_unlock(&psAudioDecPriv->tCmdMutex);
 	}
 	
 	pthread_mutex_unlock(&psAudioDecodeRes->tAudioDecodeCtrlMutex);
@@ -714,13 +764,13 @@ PlayDecode_ThreadDestroy(
 	void *pvJoin;
 	
 	if(psVideoDecodeRes->tVideoDecodeThread){
-			VideoDecThread_IOCTL(psVideoDecodeRes, eDECODE_IOCTL_SET_STATE, (void *)eDecThreadState, sizeof(E_DECODE_THREAD_STATE), true);
+			VideoDecThread_IOCTL(psVideoDecodeRes, eDECODE_IOCTL_SET_STATE, (void *)eDecThreadState, sizeof(E_DECODE_THREAD_STATE), false);
 			pthread_join(psVideoDecodeRes->tVideoDecodeThread, &pvJoin);
 			psVideoDecodeRes->tVideoDecodeThread = NULL;
 	}
 		
 	if(psAudioDecodeRes->tAudioDecodeThread){
-			AudioDecThread_IOCTL(psAudioDecodeRes, eDECODE_IOCTL_SET_STATE, (void *)eDecThreadState, sizeof(E_DECODE_THREAD_STATE), true);
+			AudioDecThread_IOCTL(psAudioDecodeRes, eDECODE_IOCTL_SET_STATE, (void *)eDecThreadState, sizeof(E_DECODE_THREAD_STATE), false);
 			pthread_join(psAudioDecodeRes->tAudioDecodeThread, &pvJoin);
 			psAudioDecodeRes->tAudioDecodeThread = NULL;
 	}

@@ -31,7 +31,7 @@ extern "C" {
 	#undef bool
 	#undef false
 	#undef true
-	#define bool	char
+	#define bool	int
 	#define false	0
 	#define true	(!false)
 #endif

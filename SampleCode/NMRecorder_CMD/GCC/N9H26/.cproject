@@ -195,7 +195,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_VideoIn"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_EDMA"/>
                                     									

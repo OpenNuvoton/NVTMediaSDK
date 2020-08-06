@@ -171,7 +171,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
-                                    <listOptionValue builtIn="false" value="AACDecoder"/>
+                                    <listOptionValue builtIn="false" value="N9H26_AACDecoder"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_VPOST_GIANTPLUS_GPM1006D"/>
                                     									
@@ -197,7 +197,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     									
@@ -471,7 +471,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
-                                    <listOptionValue builtIn="false" value="AACDecoder"/>
+                                    <listOptionValue builtIn="false" value="N9H26_AACDecoder"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_VPOST_GIANTPLUS_GPM1006D"/>
                                     									
@@ -497,7 +497,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     									
@@ -775,7 +775,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
-                                    <listOptionValue builtIn="false" value="AACDecoder"/>
+                                    <listOptionValue builtIn="false" value="N9H26_AACDecoder"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_VPOST_FW050TFT_800x480"/>
                                     									
@@ -801,7 +801,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     									
@@ -1075,7 +1075,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="ImgProc"/>
                                     									
-                                    <listOptionValue builtIn="false" value="AACDecoder"/>
+                                    <listOptionValue builtIn="false" value="N9H26_AACDecoder"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_VPOST_FW050TFT_800x480"/>
                                     									
@@ -1101,7 +1101,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SPU"/>
                                     									
-                                    <listOptionValue builtIn="false" value="N9H26_H264Codec"/>
+                                    <listOptionValue builtIn="false" value="N9H26_H264CodecFreeRTOS"/>
                                     									
                                     <listOptionValue builtIn="false" value="N9H26_SYS_FreeRTOS"/>
                                     									

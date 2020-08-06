@@ -84,6 +84,7 @@ typedef struct{
 	pthread_t tDeMuxThread;
 
 	pthread_mutex_t tDeMuxCtrlMutex;
+	int i32SemLock;
 	sem_t tDeMuxCtrlSem;
 	
 	struct s_play_engine_res *psPlayEngRes;

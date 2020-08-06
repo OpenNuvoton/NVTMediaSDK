@@ -50,6 +50,7 @@ typedef enum {
 typedef struct {
 	E_DEMUX_THREAD_STATE eDeMuxThreadState;
 
+	pthread_mutex_t tCmdMutex;
 	E_DEMUX_IOCTL_CODE	eCmdCode;
 	void *pvCmdArgv;
 	E_NM_ERRNO eCmdRet;
@@ -232,9 +233,20 @@ RunDeMuxCmd(
 )
 {
 	S_DEMUX_PRIV *psDeMuxPriv = (S_DEMUX_PRIV *)psDeMuxRes->pvDeMuxPriv;
+	int i32SemValue;
 
-	if(psDeMuxPriv->eCmdCode == eDEMUX_IOCTL_NONE)
+	pthread_mutex_lock(&psDeMuxPriv->tCmdMutex);
+
+	if(psDeMuxPriv->eCmdCode == eDEMUX_IOCTL_NONE){
+		sem_getvalue(&psDeMuxRes->tDeMuxCtrlSem, &i32SemValue);
+		if(i32SemValue < 0){
+			printf("%s, %s: Warning! post semaphore again! \n", __FILE__, __FUNCTION__);
+			sem_post(&psDeMuxRes->tDeMuxCtrlSem);
+		}
+			
+		pthread_mutex_unlock(&psDeMuxPriv->tCmdMutex);
 		return 0;
+	}
 
 	psDeMuxPriv->eCmdRet = eNM_ERRNO_NONE;
 
@@ -289,7 +301,7 @@ RunDeMuxCmd(
 	
 	psDeMuxPriv->eCmdCode = eDEMUX_IOCTL_NONE;
 
-	int i32SemValue;
+	pthread_mutex_unlock(&psDeMuxPriv->tCmdMutex);
 	
 	sem_getvalue(&psDeMuxRes->tDeMuxCtrlSem,	&i32SemValue);
 
@@ -671,6 +683,12 @@ InitDeMuxPriv(
 		goto InitDeMuxPriv_fail;
 	}
 
+	//Init command mutex
+	if(pthread_mutex_init(&psDeMuxPriv->tCmdMutex, NULL) != 0){
+		eNMRet = eNM_ERRNO_OS;
+		goto InitDeMuxPriv_fail;
+	}
+		
 	u32MediaImagePixels = psDeMuxRes->sMediaVideoCtx.u32Width * psDeMuxRes->sMediaVideoCtx.u32Height;
 
 	u32MediaAudioSamples = psDeMuxRes->sMediaAudioCtx.u32SamplePerBlock * 2;
@@ -699,6 +717,7 @@ InitDeMuxPriv(
 		psDeMuxPriv->asAudioFrameData[i].pu8ChunkBuf = pu8TempBuf;
 	}
 
+	 
 	psDeMuxPriv->eCmdCode = eDEMUX_IOCTL_NONE;	
 	psDeMuxPriv->pvCmdArgv = NULL;	
 	psDeMuxPriv->eFFSpeed = eNM_PLAY_FASTFORWARD_1X;
@@ -723,9 +742,11 @@ InitDeMuxPriv_fail:
 		}
 	}
 	
-	if(psDeMuxPriv)
+	if(psDeMuxPriv){
+		pthread_mutex_destroy(&psDeMuxPriv->tCmdMutex);
 		free(psDeMuxPriv);
-	
+	}
+
 	return eNMRet;
 }
 
@@ -755,7 +776,8 @@ FinialDeMuxPriv(
 			psDeMuxPriv->asAudioFrameData[i].pu8ChunkBuf = NULL;
 		}
 	}
-	
+
+	pthread_mutex_destroy(&psDeMuxPriv->tCmdMutex);
 	free(psDeMuxPriv);
 	psDeMuxRes->pvDeMuxPriv = NULL;
 }
@@ -780,6 +802,7 @@ DeMuxThread_IOCTL(
 		return eNM_ERRNO_NONE;
 	
 	pthread_mutex_lock(&psDeMuxRes->tDeMuxCtrlMutex);
+	pthread_mutex_lock(&psDeMuxPriv->tCmdMutex);
 
 	//Argument size check
 	switch (eCmdCode){
@@ -822,10 +845,16 @@ DeMuxThread_IOCTL(
 		psDeMuxPriv->eCmdCode = eCmdCode;
 		psDeMuxPriv->pvCmdArgv = pvCmdArgv;		
 
+		pthread_mutex_unlock(&psDeMuxPriv->tCmdMutex);
 		if(bBlocking){
+			psDeMuxRes->i32SemLock = 1;
 			sem_wait(&psDeMuxRes->tDeMuxCtrlSem);
+			psDeMuxRes->i32SemLock = 0;
 			eNMRet = psDeMuxPriv->eCmdRet;
 		}
+	}
+	else{
+		pthread_mutex_unlock(&psDeMuxPriv->tCmdMutex);
 	}
 	
 	pthread_mutex_unlock(&psDeMuxRes->tDeMuxCtrlMutex);
@@ -887,7 +916,7 @@ PlayDeMux_ThreadDestroy(
 	void *pvJoin;
 
 	if(psDeMuxRes->tDeMuxThread){
-			DeMuxThread_IOCTL(psDeMuxRes, eDEMUX_IOCTL_SET_STATE, (void *)eDeMuxThreadState, sizeof(E_DEMUX_THREAD_STATE), true);
+			DeMuxThread_IOCTL(psDeMuxRes, eDEMUX_IOCTL_SET_STATE, (void *)eDeMuxThreadState, sizeof(E_DEMUX_THREAD_STATE), false);
 			pthread_join(psDeMuxRes->tDeMuxThread, &pvJoin);
 			psDeMuxRes->tDeMuxThread = NULL;
 	}

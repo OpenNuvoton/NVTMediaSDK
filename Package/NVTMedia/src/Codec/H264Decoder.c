@@ -45,6 +45,7 @@ typedef struct {
 	bool bInit;
 	E_H264DEC_COLOR eDecColor;
 	uint8_t *pu8BSBuf;
+	uint32_t u32BSBufLen;
 	uint32_t u32VPETransBufSize;
 	uint8_t *pu8VPETransBuf;
 	uint8_t *pu8VPETransSrcBuf;
@@ -95,6 +96,7 @@ NM_H264Dec_Init(
 	
 	//Allocate aligned 32 bitstream buffer
 	pu8TempBSBuf = nv_malloc(u32SrcImageSize / 2, 32);
+	psH264DecRes->u32BSBufLen = u32SrcImageSize / 2;
 	
 	if(pu8TempBSBuf == NULL){
 		i32Ret = -3;
@@ -335,6 +337,10 @@ NM_H264Dec_Decode(
 	sDecParam.pu8Display_addr[2] = (unsigned int)(psH264DecRes->pu8VPETransSrcBuf + u32SrcImagePixel + (u32SrcImagePixel / 4));
 
 	sDecParam.u32Pkt_size =	(unsigned int)psSrcCtx->u32DataSize;
+
+	if(psH264DecRes->u32BSBufLen < sDecParam.u32Pkt_size)
+		NMLOG_ERROR("Bit stream buffer < packet size \n");
+		
 	memcpy(psH264DecRes->pu8BSBuf, psSrcCtx->pu8DataBuf, psSrcCtx->u32DataSize);
 	//			sDecParam.pu8Pkt_buf = (UINT8 *)((UINT32)psVideoPacket->pu8DataPtr | CACHE_BIT31);
 	sDecParam.pu8Pkt_buf = (UINT8 *)((UINT32)psH264DecRes->pu8BSBuf | CACHE_BIT31);
