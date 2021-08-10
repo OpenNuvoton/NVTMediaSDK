@@ -280,7 +280,7 @@ RunDeMuxCmd(
 			psDeMuxPriv->eCmdRet = SeekPlay(psDeMuxRes, psSeekArgv->u32SeekTime, psSeekArgv->u32TotalVideoChunks, psSeekArgv->u32TotalAudioChunks);
 			free(psSeekArgv);
 			
-			if((psDeMuxPriv->eCmdRet == eNM_ERRNO_NONE) && (psDeMuxPriv->eDeMuxThreadState == eDEMUX_THREAD_STATE_PLAYING)){
+			if((psDeMuxPriv->eCmdRet == eNM_ERRNO_NONE) && ((psDeMuxPriv->eDeMuxThreadState == eDEMUX_THREAD_STATE_PLAYING) || (psDeMuxPriv->eDeMuxThreadState == eDEMUX_THREAD_STATE_EOM))){
 				psDeMuxPriv->eDeMuxThreadState = eDEMUX_THREAD_STATE_TO_PLAY;
 			}
 		}
